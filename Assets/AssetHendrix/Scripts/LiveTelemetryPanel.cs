@@ -1,0 +1,36 @@
+using UnityEngine;using UnityEngine.UI;
+namespace Caronte{
+public class LiveTelemetryPanel:MonoBehaviour{
+ public CarontePrototype app;public CaronteStation station;Transform host,rightHost;MissionGraph energy,data;Text summary,rightText,energyLabel,dataLabel;Image batteryGauge,scienceGauge;float refresh;bool inOperation;Button continueButton;Text continueLabel;Transform speedControls;
+ RectTransform R(Transform p,string name,float x,float y,float w,float h){var go=new GameObject(name,typeof(RectTransform));go.transform.SetParent(p,false);var r=go.GetComponent<RectTransform>();r.anchorMin=r.anchorMax=new Vector2(0,1);r.pivot=new Vector2(0,1);r.anchoredPosition=new Vector2(x,-y);r.sizeDelta=new Vector2(w,h);return r;}
+ Text T(Transform p,string text,float x,float y,float w,float h,int size){var r=R(p,"Text",x,y,w,h);var t=r.gameObject.AddComponent<Caronte.LocalizedText>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.text=text;t.fontSize=size;t.resizeTextForBestFit=true;t.resizeTextMinSize=14;t.resizeTextMaxSize=size;t.color=new Color(.8f,.93f,1);t.raycastTarget=false;return t;}
+ Image B(Transform p,string name,float x,float y,float w,float h,Color c){var r=R(p,name,x,y,w,h);var im=r.gameObject.AddComponent<Image>();im.color=c;im.raycastTarget=false;return im;}
+ public void Rebuild(){
+ var content=station.dataScreen.Find("GraphicsConsole/Content");if(!content)return;var old=content.Find("LiveCharts");if(old)DestroyImmediate(old.gameObject);
+ var h=R(content,"LiveCharts",24,555,1150,225);host=h;B(h,"ChartBackground",0,0,1150,225,new Color(.025f,.07f,.11f));
+ energyLabel=T(h,"BATERÍA (Wh) / DÍA 0—30",12,8,540,28,20);dataLabel=T(h,"DATOS (MB) / DÍA 0—30",590,8,540,28,20);
+ for(int side=0;side<2;side++){float x=side==0?12:590;for(int grid=0;grid<4;grid++)B(h,"Grid",x,48+grid*40,540,1,new Color(.1f,.2f,.28f));var rt=R(h,"LiveSeries",x,45,540,135);rt.gameObject.AddComponent<CanvasRenderer>();var g=rt.gameObject.AddComponent<MissionGraph>();g.energy=side==0;g.capacity=app.Configuration.Capacity;g.raycastTarget=false;if(side==0)energy=g;else data=g;}
+ T(h,"Verde: energía almacenada",12,190,540,25,17);T(h,"Azul: memoria / Ámbar: datos enviados",590,190,540,25,17);
+ var preview=content.Find("SatellitePreview");if(preview)preview.GetComponent<RectTransform>().sizeDelta=new Vector2(740,340);
+ foreach(var t in content.GetComponentsInChildren<Text>()){if(t.text=="ARQUITECTURA MODULAR / DISEÑO EN VIVO")t.rectTransform.anchoredPosition=new Vector2(30,-440);}
+ app.telemetry.rectTransform.anchoredPosition=new Vector2(28,-477);app.telemetry.rectTransform.sizeDelta=new Vector2(1140,40);app.eventsText.gameObject.SetActive(false);
+ var console=app.transform.Find("MissionConsole/Content");old=console.Find("OperationalDashboard");if(old)DestroyImmediate(old.gameObject);rightHost=R(console,"OperationalDashboard",24,120,852,590);B(rightHost,"Background",0,0,852,590,new Color(.018f,.05f,.085f));T(rightHost,"TELEMETRÍA / ESTADO DE LA MISIÓN",16,15,820,40,28);
+ rightText=T(rightHost,"",16,68,820,220,24);B(rightHost,"BatteryTrack",16,326,820,24,new Color(.08f,.15f,.22f));batteryGauge=B(rightHost,"BatteryGauge",16,326,820,24,new Color(.3f,.8f,.6f));T(rightHost,"Carga de batería / energía almacenada",16,291,820,30,22);
+ B(rightHost,"ScienceTrack",16,410,820,24,new Color(.08f,.15f,.22f));scienceGauge=B(rightHost,"ScienceGauge",16,410,820,24,new Color(.4f,.7f,1));T(rightHost,"Objetivo científico transmitido",16,375,820,30,22);summary=T(rightHost,"",16,453,820,85,20);speedControls=R(rightHost,"SpeedControls",0,0,852,590);var proceed=B(rightHost,"ContinueNextMission",16,540,820,44,new Color(.025f,.35f,.24f));proceed.raycastTarget=true;continueButton=proceed.gameObject.AddComponent<Button>();continueButton.onClick.AddListener(()=>{if(station.ConsoleActive){var director=station.GetComponent<MissionControlDirector>();if(director)director.ContinueToNextMission();}});continueLabel=T(proceed.transform,"CONTINUAR CON LA SIGUIENTE MISIÓN",8,3,804,37,23);proceed.gameObject.SetActive(false);string[] speeds={"×1","×5","×30","Completar"};for(int i=0;i<4;i++){int index=i;var b=B(speedControls,speeds[i],16+i*205,548,195,34,new Color(.06f,.18f,.27f));b.raycastTarget=true;var button=b.gameObject.AddComponent<Button>();button.onClick.AddListener(()=>{if(!station.ConsoleActive)return;if(index==3){var director=station.GetComponent<MissionControlDirector>();if(!director||Time.time>=director.OrbitStartedAt+director.orbitVerificationSeconds)app.CompleteSimulation();}else app.SetSimulationSpeed(new[]{60f,300f,1800f}[index]);});T(b.transform,speeds[i],0,1,195,30,18);}rightHost.gameObject.SetActive(false);
+ }
+ void LateUpdate(){var room=station.GetComponent<StationRoomController>();if(room&&room.IsPaused)return;
+ var parent=station.dataScreen.Find("GraphicsConsole/Content");if(!host||host.parent!=parent){Rebuild();if(!host)return;}
+ bool op=app.Stage>=3;if(op!=inOperation){inOperation=op;app.leftPanel.gameObject.SetActive(!op);rightHost.gameObject.SetActive(op);}
+ var director=station.GetComponent<MissionControlDirector>();bool ready=director&&director.AwaitingContinuation;if(continueButton)continueButton.gameObject.SetActive(ready);if(speedControls)speedControls.gameObject.SetActive(!ready&&!(director&&director.Terminal));
+ var eng=app.CurrentEngine;if(eng==null){if(energy.samples!=null){energy.samples=null;data.samples=null;energy.SetVerticesDirty();data.SetVerticesDirty();energyLabel.text="BATERÍA (Wh) / DÍA 0—30";dataLabel.text="DATOS (MB) / DÍA 0—30";}return;}
+ energy.windowSeconds=eng.Result.config.Period*2;data.windowSeconds=43200;energy.capacity=eng.Result.config.Capacity;energy.samples=eng.Result.samples;data.samples=eng.Result.samples;
+ if(Time.unscaledTime>=refresh){refresh=Time.unscaledTime+.1f;energy.SetVerticesDirty();data.SetVerticesDirty();}energyLabel.text="BATERÍA "+eng.Energy.ToString("0.0")+" Wh / últimas 2 órbitas";dataLabel.text="DATOS "+eng.Stored.ToString("0")+" MB / últimas 12 h";
+ var fail=station.GetComponent<OrbitalFailureController>();string alert=fail?fail.Alert:"";
+ if(op){rightText.text=eng.MissionClock+" · ÓRBITA "+eng.OrbitNumber+"\n"+(eng.Eclipse?"ECLIPSE":"ILUMINACIÓN")+" · "+(eng.Contact?"VENTANA DE CONTACTO":"FUERA DE VENTANA")+"\n"+(eng.Contact?"Descarga habilitada":"Próximo contacto en "+System.Math.Ceiling(eng.NextContactSeconds/60)+" min")+"\n\n"+(string.IsNullOrEmpty(alert)?(eng.Powered?"EQUIPOS OPERATIVOS":"SIN ENERGÍA"):alert);
+ 
+ rightText.color=!string.IsNullOrEmpty(alert)?new Color(1,.6f,.45f):new Color(.75f,.95f,.9f);
+ batteryGauge.rectTransform.sizeDelta=new Vector2(820*Mathf.Clamp01(eng.Energy/eng.Result.config.Capacity),24);scienceGauge.rectTransform.sizeDelta=new Vector2(820*Mathf.Clamp01((float)(eng.Result.useful/eng.Result.config.Mission.dataGoal)),24);
+ if(!(director&&director.Terminal))summary.text="Genera "+eng.GeneratedW.ToString("0")+" W · consume "+eng.ConsumedW.ToString("0")+" W · batería "+eng.BatteryFlowW.ToString("+0.0;-0.0;0")+" W\nCapturados "+eng.Result.captured.ToString("0")+" MB · enviados "+eng.Result.sent.ToString("0")+" MB\nÚtiles "+eng.Result.useful.ToString("0")+" / "+eng.Result.config.Mission.dataGoal+" MB · velocidad ×"+(app.SimulationSpeed/60).ToString("0");
+ }
+ }
+}}

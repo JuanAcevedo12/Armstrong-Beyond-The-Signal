@@ -1,0 +1,461 @@
+INCOMPATIBLE · Cámara de 12 kg: supera el espacio asignado a carga útil 6U.	INCOMPATIBLE · The 12 kg camera exceeds the space allocated to the 6U payload.
+Batería	Battery
+Órbita	Orbit
+ENSAMBLA EL SATÉLITE ANTES DE LANZAR.	ASSEMBLE THE SATELLITE BEFORE LAUNCH.
+PREPARACIÓN · Secuencia narrativa de lanzamiento	PREPARATION · Launch sequence
+OPERACIÓN ORBITAL · Escala visual comprimida	ORBITAL OPERATIONS · Compressed visual scale
+INFORME DE MISIÓN\n\nPuntuación: 	MISSION REPORT\n\nScore: 
+OBJETIVO ALCANZADO	OBJECTIVE ACHIEVED
+OBJETIVO INCOMPLETO	OBJECTIVE INCOMPLETE
+ / 30 días\nCapturados: 	 / 30 days\nCaptured: 
+ MB\nÚtiles: 	 MB\nUseful: 
+ MB\nEnergía mínima: 	 MB\nMinimum energy: 
+ Wh\nTiempo sin energía: 	 Wh\nTime without power: 
+Aumenta almacenamiento o enlace.\n	Increase storage or link capacity.\n
+Aumenta paneles/batería o reduce actividad.	Increase solar panels/battery or reduce activity.
+\n\nPuntuación: ciencia 70 + conservación de datos 15 + continuidad eléctrica 15.	\n\nScore: science 70 + data preservation 15 + power continuity 15.
+\n\nEnsayo anterior: 	\n\nPrevious trial: 
+ ensayo(s) en esta sesión	 trial(s) in this session
+ENERGÍA ALMACENADA (Wh) · 0 — 30 días	STORED ENERGY (Wh) · 0 — 30 days
+JSON copiado al portapapeles.	JSON copied to clipboard.
+LANZAMIENTO EN 	LAUNCH IN 
+ASCENSO Y SEPARACIÓN · Representación narrativa	ASCENT AND SEPARATION · Narrative representation
+ · ÓRBITA 	 · ORBIT 
+ W · BATERÍA 	 W · BATTERY 
+ILUMINACIÓN	SUNLIGHT
+CONTACTO TERRESTRE	GROUND CONTACT
+SIN CONTACTO	NO CONTACT
+CAPTURA ACTIVA	CAPTURE ACTIVE
+INSTRUMENTO EN ESPERA	INSTRUMENT ON STANDBY
+INSPECCIÓN · 	INSPECTION · 
+OBSERVACIÓN TERRESTRE  /  CUBESAT 6U  /  30 DÍAS	EARTH OBSERVATION  /  CUBESAT 6U  /  30 DAYS
+01  /  CONSTRUYE TU MISIÓN	01  /  BUILD YOUR MISSION
+Microcámara	Microcamera
+Óptica grande ×	Large optical camera ×
+02 / ENSAMBLAJE    ·    ARRASTRA CON BOTÓN DERECHO / RUEDA PARA ZOOM	02 / ASSEMBLY    ·    RIGHT-CLICK AND DRAG / SCROLL TO ZOOM
+Visual ampliado 1:2:3 · Dimensión 6U de referencia: 100 × 226.3 × 366 mm	Enlarged visual 1:2:3 · Reference 6U dimensions: 100 × 226.3 × 366 mm
+Rediseñar	Redesign
+Vista general	Overview
+Reducir movimiento	Reduce motion
+Copiar JSON	Copy JSON
+CARONTE / DISEÑO DE MISIÓN	CARONTE / MISSION DESIGN
+01 DISEÑAR   >   02 ENSAMBLAR   >   03 LANZAR	01 DESIGN   >   02 ASSEMBLE   >   03 LAUNCH
+ENSAMBLAJE PENDIENTE · Confirma tu diseño	ASSEMBLY PENDING · Confirm your design
+ENSAMBLAR CON BRAZOS ROBÓTICOS	ASSEMBLE WITH ROBOTIC ARMS
+LANZAR / REQUIERE ENSAMBLAJE COMPLETO	LAUNCH / COMPLETE ASSEMBLY REQUIRED
+CARONTE / TELEMETRÍA Y ARQUITECTURA	CARONTE / TELEMETRY AND ARCHITECTURE
+CLIC Y ARRASTRA PARA GIRAR EL CANSAT	CLICK AND DRAG TO ROTATE THE CANSAT
+ARQUITECTURA MODULAR / DISEÑO EN VIVO	MODULAR ARCHITECTURE / LIVE DESIGN
+MASA TOTAL	TOTAL MASS
+POTENCIA MEDIA	AVERAGE POWER
+BATERÍA	BATTERY
+≤ MÁX 	≤ MAX 
+≥ MÍN 	≥ MIN 
+CAPACIDAD BATERÍA	BATTERY CAPACITY
+LANZAR MISIÓN	LAUNCH MISSION
+LANZAR CON ADVERTENCIAS	LAUNCH WITH WARNINGS
+LANZAR / ENSAMBLAJE PENDIENTE	LAUNCH / ASSEMBLY PENDING
+ENSAMBLAJE VERIFICADO · 	ASSEMBLY VERIFIED · 
+BRAZOS EN OPERACIÓN	ARMS IN OPERATION
+SATÉLITE ENSAMBLADO	SATELLITE ASSEMBLED
+DISEÑO VIRTUAL / PENDIENTE DE ENSAMBLAJE	VIRTUAL DESIGN / AWAITING ASSEMBLY
+PÉRDIDA TOTAL · REDISEÑA LA MISIÓN	TOTAL LOSS · REDESIGN THE MISSION
+SATÉLITE DESTRUIDO / SIN CONEXIÓN	SATELLITE DESTROYED / NO CONNECTION
+ENSAMBLAJE COMPLETO · 	ASSEMBLY COMPLETE · 
+ piezas verificadas	 verified parts
+BRAZOS EN PARALELO · 	ARMS IN PARALLEL · 
+GRAVEDAD CERO · WASD / ESPACIO subir / CTRL bajar · ESC pausa	ZERO GRAVITY · WASD / SPACE up / CTRL down · ESC pause
+ENSAMBLAJE EN CURSO · 	ASSEMBLY IN PROGRESS · 
+ piezas · Puedes recorrer la sala	 parts · You can explore the room
+CONSOLA ACTIVA · Clic para seleccionar / ESC para explorar	CONSOLE ACTIVE · Click to select / ESC to explore
+WASD · MOUSE para mirar · E consola · ALT cursor · ESC pausa	WASD · MOUSE to look · E console · ALT cursor · ESC pause
+WASD · MOUSE para mirar · Acércate al escritorio	WASD · MOUSE to look · Approach the desk
+BATERÍA (Wh) / DÍA 0—30	BATTERY (Wh) / DAY 0—30
+DATOS (MB) / DÍA 0—30	DATA (MB) / DAY 0—30
+Verde: energía almacenada	Green: stored energy
+Azul: memoria / Ámbar: datos enviados	Blue: memory / Amber: transmitted data
+TELEMETRÍA / ESTADO DE LA MISIÓN	TELEMETRY / MISSION STATUS
+Carga de batería / energía almacenada	Battery charge / stored energy
+Objetivo científico transmitido	Science objective transmitted
+CONTINUAR CON LA SIGUIENTE MISIÓN	CONTINUE TO THE NEXT MISSION
+BATERÍA 	BATTERY 
+ Wh / últimas 2 órbitas	 Wh / last 2 orbits
+ MB / últimas 12 h	 MB / last 12 h
+VENTANA DE CONTACTO	CONTACT WINDOW
+FUERA DE VENTANA	OUTSIDE CONTACT WINDOW
+Descarga habilitada	Downlink enabled
+Próximo contacto en 	Next contact in 
+EQUIPOS OPERATIVOS	EQUIPMENT OPERATIONAL
+SIN ENERGÍA	NO POWER
+ W · batería 	 W · battery 
+ MB\nÚtiles 	 MB\nUseful 
+Energía	Energy
+Propulsión	Propulsion
+Control térmico	Thermal control
+Estación terrena	Ground station
+Pequeña	Small
+Hasta 150 kg / costo bajo	Up to 150 kg / low cost
+Espacio y masa limitados	Limited space and mass
+Hasta 850 kg / capacidad media	Up to 850 kg / medium capacity
+Más margen para instrumentos y combustible	More room for instruments and fuel
+Hasta 6000 kg / gran capacidad	Up to 6000 kg / high capacity
+Permite cargas pesadas; aumenta costo y masa	Supports heavy payloads; increases cost and mass
+Cámara óptica	Optical camera
+Imágenes de superficies y nubes	Images of surfaces and clouds
+Datos ópticos / requiere apuntamiento	Optical data / pointing required
+Telescopio infrarrojo	Infrared telescope
+Universo en infrarrojo / espejo frío	Infrared universe / cold mirror
+Alta masa; exige escudo y precisión	High mass; requires a shield and precision
+Campos y partículas	Fields and particles
+Mide magnetismo y plasma	Measures magnetism and plasma
+Bajo volumen de datos; observación del entorno	Low data volume; environmental observation
+Paneles fijos	Fixed panels
+Poca masa / poca potencia	Low mass / low power
+80 W de referencia a 1 UA	80 W reference at 1 AU
+Paneles desplegables	Deployable panels
+Más superficie / mayor potencia	More surface area / higher power
+600 W de referencia a 1 UA; requiere despliegue	600 W reference at 1 AU; deployment required
+Generación continua / sin iluminación	Continuous generation / no sunlight required
+180 W continuos; masa y costo superiores	180 W continuous; higher mass and cost
+20 Wh / reserva mínima	20 Wh / minimum reserve
+Ahorra masa; vulnerable a eclipses largos	Saves mass; vulnerable to long eclipses
+120 Wh / eclipses cortos	120 Wh / short eclipses
+Reserva para observación terrestre	Reserve for Earth observation
+1000 Wh / alto consumo	1000 Wh / high consumption
+Soporta eclipses largos con mayor masa	Supports long eclipses with greater mass
+Gas frío	Cold gas
+Ajustes pequeños / bajo empuje	Small adjustments / low thrust
+No proporciona frenado interplanetario	Does not provide interplanetary braking
+Motor químico	Chemical engine
+Frenado e inserción / alto empuje	Braking and insertion / high thrust
+Mayor masa de sistema y propelente	Greater system and propellant mass
+Motor iónico	Ion engine
+Alta eficiencia / empuje bajo	High efficiency / low thrust
+Añade 90 W durante maniobras	Adds 90 W during maneuvers
+De parche	Patch antenna
+Corta distancia / baja ganancia	Short range / low gain
+Enlace de referencia 2 Mbps	Reference link: 2 Mbps
+Parabólica 1 m	1 m dish
+Alcance medio / ganancia media	Medium range / medium gain
+Necesita orientación del enlace	Link pointing required
+Parabólica 3 m	3 m dish
+Espacio profundo / alta ganancia	Deep space / high gain
+Exige precisión de apuntamiento	Precise pointing required
+Estabilización por giro	Spin stabilization
+Simple / baja precisión	Simple / low precision
+Adecuada para sensores de entorno	Suitable for environmental sensors
+Ruedas de reacción	Reaction wheels
+Precisión para imágenes y antenas	Precision for imaging and antennas
+Consumo continuo de control	Continuous control power consumption
+Ruedas + rastreador estelar	Wheels + star tracker
+Máxima precisión / estrellas de referencia	Maximum precision / reference stars
+Permite observación infrarroja estable	Enables stable infrared observation
+Mantas pasivas	Passive blankets
+Entorno templado / sin consumo	Moderate environment / no power consumption
+Aislamiento sin regulación activa	Insulation without active regulation
+Calentadores y radiadores	Heaters and radiators
+Frío y ciclos térmicos extremos	Cold and extreme thermal cycles
+Añade 60 W de acondicionamiento	Adds 60 W for conditioning
+Escudo solar	Sun shield
+Bloquea calor / mantiene sombra	Blocks heat / maintains shade
+Protege óptica fría o paso cerca del Sol	Protects cold optics or close solar approaches
+Costo bajo / poca radiación	Low cost / low radiation
+5 W; limitada fuera del entorno terrestre	5 W; limited beyond Earth's environment
+Tolerante a radiación	Radiation tolerant
+Operación interplanetaria	Interplanetary operation
+8 W; mayor tolerancia	8 W; greater tolerance
+Radiación intensa / alta protección	Intense radiation / high protection
+12 W; mayor masa y costo	12 W; higher mass and cost
+Carga pequeña / órbita terrestre	Small payload / Earth orbit
+Servicio de lanzamiento cercano	Nearby launch service
+Luna, Marte y L2	Moon, Mars and L2
+Más capacidad y energía de salida	Greater capacity and departure energy
+Destinos de alta exigencia	Demanding destinations
+Máxima capacidad del catálogo	Maximum catalog capacity
+Recepción de misiones cercanas	Reception for nearby missions
+Red terrestre de menor costo	Lower-cost ground network
+Recepción interplanetaria	Interplanetary reception
+Mayor sensibilidad para enlaces débiles	Higher sensitivity for weak links
+Máxima sensibilidad / señal muy débil	Maximum sensitivity / very weak signal
+Necesaria en el escenario de Júpiter	Required in the Jupiter scenario
+Observación terrestre	Earth observation
+Órbita terrestre baja / 36 min de eclipse / descarga diaria	Low Earth orbit / 36 min eclipse / daily downlink
+Obtener imágenes y mantener bajo el costo	Capture images while keeping costs low
+Telescopio espacial	Space telescope
+L2 a 1.5 millones de km / óptica fría / máxima estabilidad	L2 at 1.5 million km / cold optics / maximum stability
+Observar el universo en infrarrojo	Observe the universe in infrared
+Orbitador lunar	Lunar orbiter
+Inserción con frenado / eclipses largos / ciclos térmicos	Braking insertion / long eclipses / thermal cycles
+Cartografiar la superficie lunar	Map the lunar surface
+Orbitador de Marte	Mars orbiter
+Crucero: 7 meses / luz solar reducida / enlace a 230 millones de km	Cruise: 7 months / reduced sunlight / 230 million km link
+Obtener y transmitir imágenes de Marte	Capture and transmit images of Mars
+Júpiter y Europa	Jupiter and Europa
+Crucero: más de 5 años / 27 veces menos luz / radiación intensa	Cruise: over 5 years / 27 times less light / intense radiation
+Combinar imágenes y medición de campos y partículas	Combine imaging with fields and particles measurements
+Sonda solar	Solar probe
+Perihelio: 0.3 UA / calor intenso / alta energía de lanzamiento	Perihelion: 0.3 AU / intense heat / high launch energy
+Medir viento solar y campo magnético	Measure the solar wind and magnetic field
+150 W a 1 UA; depende de iluminación	150 W at 1 AU; depends on sunlight
+2000 W a 1 UA; requiere despliegue	2000 W at 1 AU; deployment required
+330 W continuos; masa y costo altos	330 W continuous; high mass and cost
+35 Wh útiles / reserva mínima	35 usable Wh / minimum reserve
+140 Wh útiles / eclipses cortos	140 usable Wh / short eclipses
+1050 Wh útiles / eclipses largos	1050 usable Wh / long eclipses
+2800 s de impulso específico; consume 600 W	2800 s specific impulse; consumes 600 W
+Criterios de la misión cubiertos	Mission criteria met
+Armstrong... Armstrong. Aquí Control de Misión. Confirme que me recibe.	Armstrong... Armstrong. This is Mission Control. Confirm you can hear me.
+Armstrong, su señal sigue firme. Ahora necesitamos mirar más lejos.	Armstrong, your signal is steady. Now we need to look farther.
+Armstrong, el siguiente destino es la Luna. La aproximación no admite errores.	Armstrong, the next destination is the Moon. The approach leaves no room for error.
+Armstrong, ponemos rumbo a Marte. Esta vez la distancia será parte del enemigo.	Armstrong, we are heading to Mars. This time distance will work against us.
+Armstrong, entramos en territorio de Júpiter. La radiación no dará tregua.	Armstrong, we are entering Jupiter's domain. The radiation will be relentless.
+Armstrong, esta es la última orden. Vamos a acercarnos al Sol.	Armstrong, this is the final order. We are approaching the Sun.
+Prepárese para la primera misión. Observación terrestre. Necesitamos esas imágenes de vuelta.	Prepare for the first mission. Earth observation. We need those images back.
+Su segunda misión es un telescopio espacial. Mantenga fría la óptica y estable la nave.	Your second mission is a space telescope. Keep the optics cold and the spacecraft stable.
+Ensamble un orbitador lunar. Debe frenar al llegar y resistir cada paso por la sombra.	Assemble a lunar orbiter. It must brake on arrival and survive every passage through shadow.
+Prepare el orbitador de Marte. Energía y comunicaciones decidirán cuánto podremos recuperar.	Prepare the Mars orbiter. Power and communications will determine how much we can recover.
+Prepare Júpiter y Europa. Necesitamos imágenes y mediciones de campos y partículas.	Prepare Jupiter and Europa. We need images and measurements of fields and particles.
+Prepare la sonda solar. Proteja la electrónica, elija su propulsión y no retire el escudo.	Prepare the solar probe. Protect the electronics, choose your propulsion and keep the shield in place.
+CONTROL DE MISIÓN / 01	MISSION CONTROL / 01
+CONTROL DE MISIÓN / INTERCOM	MISSION CONTROL / INTERCOM
+MISIÓN EXITOSA	MISSION SUCCESSFUL
+ en la pantalla. Confirme la misión, configure el CanSat y ensámblelo.	 on the screen. Confirm the mission, configure the CanSat and assemble it.
+ segundos para ensamblar el CanSat y autorizar el lanzamiento. El reloj empieza ahora, Armstrong.	 seconds to assemble the CanSat and authorize launch. The clock starts now, Armstrong.
+Armstrong... Armstrong. Aquí Control de Misión. Hoy aprenderá a diseñar, ensamblar y operar un CanSat.	Armstrong... Armstrong. This is Mission Control. Today you will learn to design, assemble and operate a CanSat.
+Su objetivo es obtener imágenes de la Tierra y transmitir al menos 1000 MB útiles. Cada componente cambia masa, costo, consumo y supervivencia.	Your objective is to capture images of Earth and transmit at least 1000 MB of useful data. Each component affects mass, cost, consumption and survival.
+WASD para caminar, mouse para mirar. Acérquese al escritorio de enfrente y pulse E. Escape permite volver a explorar.	Use WASD to walk and the mouse to look. Approach the desk ahead and press E. Escape lets you return to exploration.
+La pantalla de diseño permite elegir misión y componentes. Pulse el título de Observación terrestre para confirmar la orden.	The design screen lets you choose the mission and components. Click the Earth observation title to confirm the order.
+En la pantalla de telemetría verá el modelo y los datos. Las marcas de masa y presupuesto son límites máximos: manténgase por debajo. Potencia, batería y propelente muestran mínimos: alcance o supere la marca.	The telemetry screen shows the model and data. Mass and budget markers are maximum limits: stay below them. Power, battery and propellant show minimums: meet or exceed them.
+Verde indica que cumple. Amarillo señala un desvío de hasta cinco por ciento; rojo, un desvío mayor. La batería debe sostener al CanSat durante los eclipses.	Green means the requirement is met. Yellow indicates a deviation of up to five percent; red means a larger deviation. The battery must sustain the CanSat during eclipses.
+La pantalla de video, al extremo derecho, recibe la cámara del CanSat. Solo tendrá señal en órbita. Si la nave funciona, buscará y decodificará un mensaje.	The video screen on the far right receives the CanSat camera. The signal is available only in orbit. If the spacecraft works, it will search for and decode a message.
+Una plataforma pequeña mantiene el costo y admite hasta 150 kg.	A small platform keeps costs down and supports up to 150 kg.
+La cámara óptica obtendrá las imágenes de la superficie.	The optical camera will capture images of the surface.
+Los paneles fijos proporcionan energía en la zona iluminada.	Fixed panels provide power in the sunlit region.
+La batería mediana guarda 140 Wh para atravesar la sombra.	The medium battery stores 140 Wh to cross the shadow.
+El gas frío permite los pequeños ajustes de esta órbita.	Cold gas enables small adjustments in this orbit.
+La antena de parche basta para el enlace cercano a la Tierra.	A patch antenna is sufficient for the near-Earth link.
+Las ruedas de reacción mantienen la cámara apuntando.	Reaction wheels keep the camera pointed.
+Las mantas pasivas bastan para este entorno térmico.	Passive blankets are sufficient for this thermal environment.
+La computadora comercial es suficiente en esta misión terrestre.	A commercial computer is sufficient for this Earth mission.
+El lanzador ligero alcanza la órbita terrestre con esta masa.	The light launcher reaches Earth orbit with this mass.
+La estación de 13 metros recibe los datos de esta misión cercana.	The 13-meter station receives data from this nearby mission.
+Los dos brazos tomarán piezas pequeñas de las mesas y las unirán con soldadura. Ensamble cuando esté listo; después vuelva con E y pulse Lanzar.	The two arms will pick up small parts from the tables and weld them together. Assemble when ready; then return with E and press Launch.
+Desde ahora dispone de 90 segundos. También puede experimentar con diseños incorrectos: el ensamblaje se permite, pero una mala elección puede terminar en pérdida de señal.	You now have 90 seconds. You can also experiment with incorrect designs: assembly is allowed, but a poor choice may result in signal loss.
+CONTROL DE MISIÓN · Orden actual: 	MISSION CONTROL · Current order: 
+CONTROL DE MISIÓN · Espere la orden de inicio.	MISSION CONTROL · Wait for the start order.
+ARMSTRONG · Seleccione y confirme 	ARMSTRONG · Select and confirm 
+CONTROL DE MISIÓN · La orden actual no coincide con el diseño.	MISSION CONTROL · The current order does not match the design.
+Lanzamiento autorizado. Armstrong, mantenga la señal. Control seguirá cada segundo de la inserción.	Launch authorized. Armstrong, maintain the signal. Control will follow every second of insertion.
+CanSat en órbita. Armstrong, no se aparte de los monitores. Verifique energía y comunicaciones. Buscaremos una señal durante dieciocho segundos de órbita.	CanSat in orbit. Armstrong, stay by the monitors. Check power and communications. We will search for a signal during eighteen seconds in orbit.
+Armstrong, misión fallida. 	Armstrong, mission failed. 
+MISIÓN EXITOSA\n	MISSION SUCCESSFUL\n
+Armstrong, señal confirmada. Mensaje decodificado. Revise el fragmento en la pantalla de video: «	Armstrong, signal confirmed. Message decoded. Check the fragment on the video screen: «
+Armstrong, veo que ya tiene experiencia. Tutorial completado: nave operativa y datos recibidos. Ya puede continuar con la segunda misión desde el botón de la pantalla de control.	Armstrong, I see you have gained experience. Tutorial complete: spacecraft operational and data received. You can now continue to the second mission using the button on the control screen.
+Armstrong, confirmamos órbita y objetivo cumplido. Misión exitosa. Cuando esté listo, pulse Continuar con la siguiente misión en la pantalla de control.	Armstrong, orbit confirmed and objective achieved. Mission successful. When ready, press Continue to the next mission on the control screen.
+TODAS LAS MISIONES COMPLETADAS	ALL MISSIONS COMPLETED
+Armstrong, la última señal ha llegado. Las seis misiones están completas. Control de Misión cierra el canal. Buen trabajo.	Armstrong, the final signal has arrived. All six missions are complete. Mission Control is closing the channel. Good work.
+Armstrong... Armstrong. Se agotó el tiempo. No tenemos lanzamiento. El sistema está colapsando.	Armstrong... Armstrong. Time has run out. We have no launch. The system is collapsing.
+CONTROL DE MISIÓN / 	MISSION CONTROL / 
+ · SELECCIONAR Y CONFIRMAR	 · SELECT AND CONFIRM
+ENLACE ENTRANTE	INCOMING LINK
+Plazo de lanzamiento agotado	Launch deadline expired
+No se autorizó el lanzamiento antes de que terminara la cuenta regresiva.	Launch was not authorized before the countdown ended.
+Armstrong, misión fallida. Revise las causas del fallo en el monitor de conexión.	Armstrong, mission failed. Review the causes on the connection monitor.
+Alerta general. Luces de emergencia activadas. La estación está colapsando. Escape para reiniciar o salir.	General alert. Emergency lights activated. The station is collapsing. Escape to restart or exit.
+SIN RESPUESTA DE CONTROL · ESC PARA REINICIAR O SALIR	NO RESPONSE FROM CONTROL · ESC TO RESTART OR EXIT
+En Plataforma, elija Pequeña. Una plataforma pequeña mantiene el costo y admite hasta 150 kg.	For Platform, choose Small. A small platform keeps costs down and supports up to 150 kg.
+En Instrumento, elija Cámara óptica. La cámara óptica obtendrá las imágenes de la superficie.	For Instrument, choose Optical camera. The optical camera will capture images of the surface.
+En Energía, elija Paneles fijos. Los paneles fijos proporcionan energía en la zona iluminada.	For Energy, choose Fixed panels. Fixed panels provide power in the sunlit region.
+En Batería, elija Mediana. La batería mediana guarda 140 Wh para atravesar la sombra.	For Battery, choose Medium. The medium battery stores 140 Wh to cross the shadow.
+En Propulsión, elija Gas frío. El gas frío permite los pequeños ajustes de esta órbita.	For Propulsion, choose Cold gas. Cold gas enables small adjustments in this orbit.
+En Antena, elija De parche. La antena de parche basta para el enlace cercano a la Tierra.	For Antenna, choose Patch antenna. A patch antenna is sufficient for the near-Earth link.
+En Actitud, elija Ruedas de reacción. Las ruedas de reacción mantienen la cámara apuntando.	For Attitude, choose Reaction wheels. Reaction wheels keep the camera pointed.
+En Control térmico, elija Mantas pasivas. Las mantas pasivas bastan para este entorno térmico.	For Thermal control, choose Passive blankets. Passive blankets are sufficient for this thermal environment.
+En Computadora, elija Comercial. La computadora comercial es suficiente en esta misión terrestre.	For Computer, choose Commercial. A commercial computer is sufficient for this Earth mission.
+En Lanzador, elija Ligero. El lanzador ligero alcanza la órbita terrestre con esta masa.	For Launcher, choose Light. The light launcher reaches Earth orbit with this mass.
+En Estación terrena, elija Antena 13 m. La estación de 13 metros recibe los datos de esta misión cercana.	For Ground station, choose 13 m antenna. The 13-meter station receives data from this nearby mission.
+Armstrong, confirme Observación terrestre en la pantalla de diseño para comenzar.	Armstrong, confirm Earth observation on the design screen to begin.
+MISIÓN 	MISSION 
+ Añadir sensor de campos y partículas · 5 cr / 10 kg / 12 W	 Add fields and particles sensor · 5 cr / 10 kg / 12 W
+TIERRA / ÓRBITA BAJA	EARTH / LOW ORBIT
+TIERRA / REFERENCIA DEL PUNTO L2	EARTH / L2 POINT REFERENCE
+LUNA / ÓRBITA LUNAR	MOON / LUNAR ORBIT
+MARTE / ÓRBITA MARCIANA	MARS / MARTIAN ORBIT
+JÚPITER Y EUROPA	JUPITER AND EUROPA
+SOL / HELIOSFERA INTERIOR	SUN / INNER HELIOSPHERE
+Lanzador incompatible: el vehículo elegido no alcanza este destino.	Incompatible launcher: the selected vehicle cannot reach this destination.
+Masa excesiva: 	Excessive mass: 
+ kg frente a 	 kg versus 
+ kg admitidos por la plataforma.	 kg allowed by the platform.
+Lanzador sobrecargado: 	Overloaded launcher: 
+ kg de capacidad para este destino.	 kg capacity for this destination.
+Presupuesto excedido: 	Budget exceeded: 
+ créditos frente al límite de 	 credits versus the limit of 
+Carga científica incompleta: Júpiter y Europa requieren cámara y sensor de campos y partículas.	Incomplete science payload: Jupiter and Europa require a camera and a fields and particles sensor.
+Instrumento inadecuado: esta misión requiere 	Unsuitable instrument: this mission requires 
+Apuntamiento insuficiente: el instrumento o la antena necesitan un control de actitud más preciso.	Insufficient pointing: the instrument or antenna needs more precise attitude control.
+Control térmico inadecuado: esta misión requiere 	Unsuitable thermal control: this mission requires 
+Inserción fallida: el motor iónico no proporciona el frenado requerido en este escenario.	Insertion failed: the ion engine does not provide the braking required in this scenario.
+Contaminación térmica: el RTG impide mantener fría la óptica infrarroja.	Thermal contamination: the RTG prevents the infrared optics from staying cold.
+Paneles desplegables incompatibles con el entorno térmico de la aproximación solar.	Deployable panels are incompatible with the thermal environment of the solar approach.
+Déficit de energía: genera en promedio 	Power deficit: average generation of 
+ W frente a 	 W versus 
+ W de consumo de referencia.	 W reference consumption.
+Batería agotada: 	Battery depleted: 
+ minutos sin alimentación durante la simulación; reserva instalada 	 minutes without power during the simulation; installed reserve 
+Enlace insuficiente: la combinación de antena y estación terrena no sostiene las comunicaciones a esta distancia.	Insufficient link: the antenna and ground station combination cannot sustain communications at this distance.
+Electrónica dañada por radiación: tolerancia de 	Electronics damaged by radiation: tolerance of 
+ krad frente a 	 krad versus 
+ krad de la misión.	 krad for the mission.
+Objetivo científico incompleto: se recuperaron 	Science objective incomplete: recovered 
+ MB útiles.	 MB of useful data.
+La configuración o el resultado no corresponden a la misión confirmada por Control.	The configuration or result does not match the mission confirmed by Control.
+LANZADOR INCOMPATIBLE · No alcanza el destino seleccionado	INCOMPATIBLE LAUNCHER · Cannot reach the selected destination
+MASA EXCEDIDA · 	MASS EXCEEDED · 
+ kg de plataforma	 kg platform
+LANZADOR SOBRECARGADO · 	LAUNCHER OVERLOADED · 
+PRESUPUESTO EXCEDIDO · 	BUDGET EXCEEDED · 
+CIENCIA LIMITADA · Revisa instrumento, actitud, temperatura o maniobra	SCIENCE LIMITED · Check instrument, attitude, temperature or maneuver
+ENERGÍA LIMITADA · Generación media menor al consumo	POWER LIMITED · Average generation below consumption
+DISEÑO VIABLE · Verifica batería y comunicaciones	VIABLE DESIGN · Check battery and communications
+Inicio de operación · 	Operations started · 
+Pérdida de enlace: electrónica fuera de tolerancia de radiación	Link lost: electronics exceeded radiation tolerance
+Eclipse: paneles sin iluminación	Eclipse: panels without sunlight
+Iluminación: generación solar disponible	Sunlight: solar generation available
+Inicio de ventana terrestre	Ground contact window begins
+Fin de ventana terrestre	Ground contact window ends
+Batería por debajo del 20 %	Battery below 20 %
+Energía recuperada: equipos operativos	Power restored: equipment operational
+Sin energía: equipos y enlace apagados	No power: equipment and link off
+Objetivo o recursos insuficientes · 	Insufficient objective or resources · 
+LANZAMIENTO EXPERIMENTAL · Diseño con restricciones. Observa la telemetría.	EXPERIMENTAL LAUNCH · Design with constraints. Watch the telemetry.
+ALERTA · ENERGÍA AGOTADA / PÉRDIDA DE CONEXIÓN · El satélite continúa a la deriva orbital.	ALERT · POWER DEPLETED / CONNECTION LOST · The satellite continues drifting in orbit.
+ALERTA · COMPUTADORA FUERA DE SERVICIO / PÉRDIDA DE CONEXIÓN POR RADIACIÓN	ALERT · COMPUTER OFFLINE / CONNECTION LOST DUE TO RADIATION
+ALERTA · PÉRDIDA DE CONEXIÓN · Antena o estación insuficiente para esta distancia.	ALERT · CONNECTION LOST · Antenna or station insufficient for this distance.
+ALERTA · DATOS CIENTÍFICOS NO VÁLIDOS · Revisa instrumento, actitud y control térmico.	ALERT · INVALID SCIENCE DATA · Check instrument, attitude and thermal control.
+ALERTA · OPERACIÓN FUERA DE DISEÑO · 	ALERT · OPERATING BEYOND DESIGN LIMITS · 
+MISIÓN COMPLETADA · Nave estable y conexión operativa.	MISSION COMPLETED · Stable spacecraft and operational connection.
+ALERTA CRÍTICA · EXPLOSIÓN / PÉRDIDA TOTAL DE CONEXIÓN · Fragmentos sin gravedad.	CRITICAL ALERT · EXPLOSION / TOTAL CONNECTION LOSS · Fragments in zero gravity.
+CARONTE / CÁMARA DE A BORDO	CARONTE / ONBOARD CAMERA
+SIN SEÑAL · ESPERANDO INSERCIÓN ORBITAL	NO SIGNAL · AWAITING ORBITAL INSERTION
+CÁMARA EN ESPERA / ENLACE CERRADO	CAMERA ON STANDBY / LINK CLOSED
+MENSAJE DECODIFICADO / CANAL CONFIRMADO	MESSAGE DECODED / CHANNEL CONFIRMED
+MISIÓN FALLIDA / CAUSAS	MISSION FAILED / CAUSES
+● EN DIRECTO / 	● LIVE / 
+PASO NOCTURNO	NIGHT PASS
+HEMISFERIO ILUMINADO	SUNLIT HEMISPHERE
+PÉRDIDA DE CONEXIÓN\nSIN VIDEO DEL CANSAT	CONNECTION LOST\nNO CANSAT VIDEO
+PÉRDIDA DE SEÑAL\nSIN VIDEO DEL CANSAT	SIGNAL LOST\nNO CANSAT VIDEO
+SIN SEÑAL\nESPERANDO INSERCIÓN ORBITAL	NO SIGNAL\nAWAITING ORBITAL INSERTION
+ENLACE INTERRUMPIDO / CONTROL DE MISIÓN	LINK INTERRUPTED / MISSION CONTROL
+Esc para continuar	Esc to resume
+Reinicie o salga de la operación.	Restart or exit the operation.
+MISIÓN FALLIDA	MISSION FAILED
+CARONTE — MISSION ARCHITECT\n\nHaz clic para iniciar con audio	CARONTE — MISSION ARCHITECT\n\nClick to start with audio
+El conocimiento	Knowledge
+la curiosidad	curiosity
+y nos impulsa	and drives us
+a explorar	to explore
+lo desconocido.	the unknown.
+TRANSMISIÓN RECUPERADA  /  	TRANSMISSION RECOVERED  /  
+Instrumento	Instrument
+Solar	Solar
+Radio	Radio
+Memoria	Memory
+MASA	MASS
+COSTO	COST
+GENERA	GENERATES
+CONSUME	CONSUMES
+Propelente:	Propellant:
+Tiempo:	Time:
+Transmitidos:	Transmitted:
+Perdidos:	Lost:
+puntos.	points.
+INFORME	REPORT
+DATOS (MB) · Azul: almacenados / Amarillo: transmitidos	DATA (MB) · Blue: stored / Yellow: transmitted
+CONSUMO	CONSUMPTION
+ECLIPSE	ECLIPSE
+Multiespectral 6U	Multispectral 6U
+Compacto 9 W	Compact 9 W
+Desplegable 26 W	Deployable 26 W
+Ampliado 42 W	Extended 42 W
+A · Equilibrada	A · Balanced
+B · Limitada	B · Limited
+C · Incompatible	C · Incompatible
+Lanzar	Launch
+Pausa / continuar	Pause / resume
+Pausa / seguir	Pause / resume
+Velocidad ×	Speed ×
+Informe	Report
+Despiece	Exploded view
+PRESUPUESTO	BUDGET
+PROPELENTE	PROPELLANT
+ENSAMBLANDO · 	ASSEMBLING · 
+ piezas	 parts
+Completar	Complete
+DATOS	DATA
+Genera 	Generates 
+ W · consume 	 W · consumes 
+Capturados	Captured
+enviados	sent
+velocidad ×	speed ×
+Plataforma	Platform
+Antena	Antenna
+Actitud	Attitude
+Computadora	Computer
+Lanzador	Launcher
+Mediana	Medium
+Grande	Large
+Comercial	Commercial
+Endurecida	Radiation hardened
+Ligero	Light
+Medio	Medium
+Pesado	Heavy
+Antena 13 m	13 m antenna
+Antena 34 m	34 m antenna
+Antena 70 m	70 m antenna
+Revisar: 	Review: 
+Seleccione 	Select 
+Tiene 	You have 
+En 	For 
+, elija 	, choose 
+ · CONFIRMADA	 · CONFIRMED
+TUTORIAL	TUTORIAL
+LANZADO	LAUNCHED
+VERIFICANDO	VERIFYING
+COMPLETADAS	COMPLETED
+COMPLETADA	COMPLETED
+ · CONFIRMAR	 · CONFIRM
+presupuesto	budget
+Consume	Consumes
+TIERRA	EARTH
+de 	of 
+PAUSA	PAUSED
+Continuar	Resume
+Reiniciar	Restart
+Salir	Exit
+despierta	awakens
+ DE 6 FRAGMENTOS	 OF 6 FRAGMENTS
+RECUPERADO	RECOVERED
+BLOQUEADO	LOCKED
+Pulsa Intro para cambiar idioma: Español / Inglés · Esc para saltar al taller	Press Enter to change language: Spanish / English · Esc to skip to the workshop
+Idioma: Español	Language: English
+Luna	Moon
+Marte	Mars
+Júpiter	Jupiter
+Sol	Sun
+Orbita	Orbit
+ENSAMBLAR	ASSEMBLE
+CARONTE — MISSION ARCHITECT	CARONTE — MISSION ARCHITECT
+Diseño	Design
+Consola	Console
+Explorar	Explore
+Pausa	Pause
+Arrastra para mirar	Drag to look
+Arrastra para girar el CanSat	Drag to rotate the CanSat
+Gira el dispositivo para ver mejor · 	Rotate your device for a better view · 
+Añadir / quitar segundo instrumento	Add / remove second instrument
+Subir	Up
+Bajar	Down
+Saltar intro	Skip intro
+Toca Idioma para cambiar entre español e inglés · Saltar intro para ir al taller	Tap Language to switch between Spanish and English · Skip intro to enter the workshop

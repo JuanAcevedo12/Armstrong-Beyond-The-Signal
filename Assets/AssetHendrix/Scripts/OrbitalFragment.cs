@@ -1,0 +1,2 @@
+using UnityEngine;
+namespace Caronte{public class OrbitalFragment:MonoBehaviour{public Vector3 velocity,spin;void Update(){transform.position+=velocity*Time.deltaTime;transform.Rotate(spin*Time.deltaTime,Space.World);}}}

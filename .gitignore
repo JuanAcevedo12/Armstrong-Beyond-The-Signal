@@ -112,3 +112,7 @@ InitTestScene*.unity*
 /Data/Plugins/lib_burst_generated.*
 /Assets/Resources.meta.private.0
 /Assets/Resources.meta.private.0.meta
+
+# Local tooling files
+/.vsconfig
+/ignore.conf

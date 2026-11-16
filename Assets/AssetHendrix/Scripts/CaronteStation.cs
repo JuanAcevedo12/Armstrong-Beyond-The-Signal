@@ -1,0 +1,182 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
+namespace Caronte {
+public class CaronteStation : MonoBehaviour {
+ public CarontePrototype app; public Camera playerCamera; public CharacterController player;
+ public IndustrialRobotArm importedRobotArm;public IndustrialRobotArm[] articulatedArms=new IndustrialRobotArm[2];public RobotLaserWelder laserWelder;public Transform videoScreen; public Transform selectionScreen,dataScreen,assemblyOrigin,leftSupply,rightSupply;
+ public Transform[] armBases,armUpper,armLower,armElbow,armWrist,armGrip;
+ public RenderTexture previewTexture;
+ public Material lightMaterial; public bool Assembled {get;private set;} public bool Busy {get;private set;}
+ public bool ConsoleActive {get;private set;}
+ public int MountedCount {get;private set;} public int TotalParts {get;private set;} float[] displayedValues=new float[5]; Button[][] choiceButtons=new Button[6][]; Coroutine viewTween;
+ public Transform physicalCraft;
+ public GraphicRaycaster selectionRaycaster;
+ Canvas consoleCanvas;Text hint,progress,assemblyLabel;Button assembleButton,launchButton;Image[] bars;Text[] values;Text[] resourceNames;
+ float yaw,pitch;float vertical;Vector3 savedPosition;Quaternion savedRotation;bool initialized;
+ string[] keys={"BatteryAnchor","StorageAnchor","FrontPayloadAnchor","LeftSolarPanelAnchor","RightSolarPanelAnchor","TopAntennaAnchor"};
+ List<GameObject> staged=new List<GameObject>();Coroutine assemblyRoutine;
+ Color cyan=new Color(.25f,.82f,1),mint=new Color(.26f,.91f,.69f);
+ void SetLayer(Transform node,int layer){node.gameObject.layer=layer;foreach(Transform c in node)SetLayer(c,layer);}
+ public void BuildConsole(CarontePrototype owner){
+ app=owner;Physics.IgnoreLayerCollision(player.gameObject.layer,8,true);if(Application.isPlaying)Application.runInBackground=true;var oldHud=app.transform.Find("StationHUD");if(oldHud)DestroyImmediate(oldHud.gameObject);
+ var old=dataScreen.Find("GraphicsConsole");if(old)DestroyImmediate(old.gameObject);
+ var s=ScreenCanvas(selectionScreen,"SelectionConsole",900,1050,true);
+ var l=ScreenCanvas(dataScreen,"GraphicsConsole",1200,800,false);consoleCanvas=s.GetComponent<Canvas>();
+ var content=Rect(s,"Content",0,0,900,1050);
+ app.leftPanel=Rect(content,"Catalog",24,120,852,590);app.rightPanel=Rect(content,"Technical",24,710,852,118);
+ TextAt(content,"CARONTE / DISEÑO DE MISIÓN",28,22,840,45,32,cyan);
+ TextAt(content,"01 DISEÑAR   >   02 ENSAMBLAR   >   03 LANZAR",28,74,840,34,23,Color.white);
+ var designer=GetComponent<MissionDesignPanel>();if(!designer)designer=gameObject.AddComponent<MissionDesignPanel>();designer.Build(app.leftPanel,this);
+ app.inspector=TextAt(app.rightPanel,"",0,0,840,110,18,Color.white);app.inspector.gameObject.SetActive(false);
+ progress=TextAt(content,"ENSAMBLAJE PENDIENTE · Confirma tu diseño",28,710,840,48,25,mint);
+ assembleButton=ButtonAt(content,"ENSAMBLAR CON BRAZOS ROBÓTICOS",28,770,844,58,StartAssembly);
+ launchButton=ButtonAt(content,"LANZAR / REQUIERE ENSAMBLAJE COMPLETO",28,840,844,58,()=>app.SendMessage("Launch"));
+ ButtonAt(content,"Rediseñar",28,912,268,48,()=>{if(!Busy)app.SendMessage("ResetDesign");});
+ ButtonAt(content,"Pausa / seguir",316,912,268,48,()=>app.TogglePause());
+ ButtonAt(content,"Copiar JSON",604,912,268,48,()=>app.SendMessage("Export"));
+ app.status=TextAt(content,"",28,978,844,62,21,Color.white);
+ // Preview drag uses screen bounds; this monitor does not need a GraphicRaycaster.
+ var left=Rect(l,"Content",0,0,1200,800);
+ TextAt(left,"CARONTE / TELEMETRÍA Y ARQUITECTURA",26,18,1140,45,29,cyan);
+ var raw=new GameObject("SatellitePreview",typeof(RectTransform),typeof(RawImage));raw.transform.SetParent(left,false);Layout(raw.GetComponent<RectTransform>(),22,82,740,435);raw.GetComponent<RawImage>().texture=previewTexture;raw.GetComponent<RawImage>().raycastTarget=false;
+ TextAt(left,"CLIC Y ARRASTRA PARA GIRAR EL CANSAT",30,484,720,28,17,cyan);
+ TextAt(left,"ARQUITECTURA MODULAR / DISEÑO EN VIVO",30,525,1120,30,20,cyan);
+ bars=new Image[5];values=new Text[5];resourceNames=new Text[5];string[] labels={"MASA TOTAL","PRESUPUESTO","POTENCIA MEDIA","BATERÍA","PROPELENTE"};
+ for(int i=0;i<5;i++){StationPolish.Decorate(left,i==0?4:i==1?6:i==2?1:i==3?2:4,752,96+i*79,34);resourceNames[i]=TextAt(left,labels[i],800,96+i*79,360,25,21,Color.white);var bg=Box(left,"ResourceTrack",800,128+i*79,344,12,new Color(.08f,.2f,.3f));bars[i]=Box(bg,"ResourceFill",0,0,344,12,mint).GetComponent<Image>();values[i]=TextAt(left,"",800,143+i*79,360,28,20,cyan);}
+ app.telemetry=TextAt(left,"",28,578,1140,48,22,Color.white);
+ assemblyLabel=TextAt(left,"",28,522,1140,28,20,mint);
+ app.eventsText=TextAt(left,"",28,688,1140,88,18,Color.white);
+ var es=new GameObject("CaronteEventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));es.transform.SetParent(app.transform,false);
+ // A minimal HUD is informational only.
+ var hud=new GameObject("StationHUD",typeof(Canvas),typeof(CanvasScaler));hud.transform.SetParent(app.transform,false);hud.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay;
+ var hrt=new GameObject("HintAnchor",typeof(RectTransform));hrt.transform.SetParent(hud.transform,false);var hr=hrt.GetComponent<RectTransform>();hr.anchorMin=hr.anchorMax=new Vector2(.5f,0);hr.pivot=new Vector2(.5f,0);hr.anchoredPosition=new Vector2(0,20);hr.sizeDelta=new Vector2(1000,50);
+ hint=TextAt(hr,"",0,0,1000,50,20,Color.white);hint.alignment=TextAnchor.MiddleCenter;
+ for(int i=0;i<armBases.Length;i++)DriveArm(i,armBases[i].position+Vector3.up*1.9f+Vector3.back*.3f); initialized=true;if(Application.isPlaying)SetConsole(false);UpdateTelemetry();
+ }
+ Transform ScreenCanvas(Transform screen,string name,float width,float height,bool interactive){
+ var go=new GameObject(interactive?"MissionConsole":name,typeof(RectTransform),typeof(Canvas));go.transform.SetParent(interactive?app.transform:screen,false);
+ go.transform.position=screen.position;go.transform.rotation=screen.rotation;go.transform.localScale=Vector3.one*.002f;
+ var rt=go.GetComponent<RectTransform>();rt.sizeDelta=new Vector2(width,height);
+ var cv=go.GetComponent<Canvas>();cv.renderMode=RenderMode.WorldSpace;cv.worldCamera=playerCamera;
+ if(interactive){selectionRaycaster=go.AddComponent<GraphicRaycaster>();selectionRaycaster.blockingObjects=GraphicRaycaster.BlockingObjects.None;}
+ Box(rt,"Display",0,0,width,height,new Color(.018f,.044f,.08f));
+ return rt;
+ }
+ static void Layout(RectTransform rt,float x,float y,float w,float h){rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(x,-y);rt.sizeDelta=new Vector2(w,h);}
+ static RectTransform Rect(Transform p,string name,float x,float y,float w,float h){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(p,false);var rt=g.GetComponent<RectTransform>();Layout(rt,x,y,w,h);return rt;}
+ static RectTransform Box(Transform p,string name,float x,float y,float w,float h,Color color){var r=Rect(p,name,x,y,w,h);var im=r.gameObject.AddComponent<Image>();im.color=color;im.raycastTarget=false;return r;}
+ static Text TextAt(Transform p,string value,float x,float y,float w,float h,int size,Color color){var r=Rect(p,"Label",x,y,w,h);var t=r.gameObject.AddComponent<Caronte.LocalizedText>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.text=value;t.fontSize=size;t.color=color;t.raycastTarget=false;t.resizeTextForBestFit=true;t.resizeTextMinSize=14;t.resizeTextMaxSize=size;return t;}
+ Button ButtonAt(Transform p,string value,float x,float y,float w,float h,Action action){var r=Box(p,value,x,y,w,h,new Color(.06f,.18f,.27f));r.GetComponent<Image>().raycastTarget=true;var b=r.gameObject.AddComponent<Button>();var cb=b.colors;cb.highlightedColor=new Color(.3f,.75f,.95f);cb.pressedColor=new Color(.15f,.9f,.7f);b.colors=cb;b.onClick.AddListener(()=>{if(ConsoleActive){var fx=GetComponent<StationPolish>();if(fx)fx.PulseScreen();action();}});var t=TextAt(r,value,12,4,w-24,h-8,23,Color.white);t.alignment=TextAnchor.MiddleCenter;return b;}
+ public void InvalidateAssembly(){if(Busy)return;Assembled=false;MountedCount=0;TotalParts=0;if(physicalCraft)Destroy(physicalCraft.gameObject);physicalCraft=null;UpdateTelemetry();}
+ public void ClearAssembly(){for(int i=0;i<2;i++){if(assemblyWorkers[i]!=null)StopCoroutine(assemblyWorkers[i]);assemblyWorkers[i]=null;RobotWorking[i]=false;}if(assemblyRoutine!=null)StopCoroutine(assemblyRoutine);Busy=false;InvalidateAssembly();foreach(var g in staged)if(g)Destroy(g);staged.Clear();}
+ public void UpdateTelemetry(){
+ if(!initialized)return;var room=GetComponent<StationRoomController>();if(room&&(room.RoomDestroyed||room.IsPaused))return;var c=app.Configuration;
+ var reference=MissionResourceGuides.Reference(c.mission);
+ float[] targetValues={c.Mass,c.Cost,c.AverageGeneration,c.Capacity,c.Propellant};
+ float[] guide={Mathf.Min(reference.MaxMass,reference.LauncherCapacity),c.Mission.budget,Mathf.Max(reference.Load,c.Load),Mathf.Max(reference.Capacity,c.Load*(float)(c.Period/3600)*c.Mission.eclipse),reference.Propellant};
+ float[] maxima={Mathf.Max(guide[0]*1.15f,c.Mass*1.05f),Mathf.Max(guide[1]*1.15f,c.Cost*1.05f),Mathf.Max(guide[2]*1.5f,c.AverageGeneration*1.1f),Mathf.Max(guide[3]*1.2f,c.Capacity*1.1f),Mathf.Max(1,Mathf.Max(guide[4]*1.5f,c.Propellant*1.1f))};
+ string[] units={" kg"," cr"," W"," Wh"," kg"};
+ for(int i=0;i<5;i++){displayedValues[i]=Application.isPlaying?Mathf.Lerp(displayedValues[i],targetValues[i],1-Mathf.Exp(-Time.deltaTime*6)):targetValues[i];bars[i].rectTransform.sizeDelta=new Vector2(344*Mathf.Clamp01(displayedValues[i]/maxima[i]),12);
+ float deviation=i<2?(targetValues[i]-guide[i])/Mathf.Max(.01f,guide[i]):(guide[i]-targetValues[i])/Mathf.Max(.01f,guide[i]);bars[i].color=deviation<=.0001f?mint:deviation<=.05f?new Color(1,.82f,.15f):new Color(1,.12f,.12f);
+ values[i].text=displayedValues[i].ToString(i==0||i==4?"0.0":"0")+units[i];
+ var marker=bars[i].transform.parent.Find("MissionGuide");if(!marker){var rt=Box(bars[i].transform.parent,"MissionGuide",0,-5,3,22,new Color(1,.8f,.25f));marker=rt;}
+ marker.GetComponent<RectTransform>().anchoredPosition=new Vector2(344*Mathf.Clamp01(guide[i]/maxima[i]),5);
+ var label=bars[i].transform.parent.Find("GuideLabel");if(!label)label=TextAt(bars[i].transform.parent,"",150,13,194,25,16,new Color(1,.8f,.25f)).transform;
+ label.name="GuideLabel";label.GetComponent<Text>().alignment=TextAnchor.MiddleRight;label.GetComponent<Text>().text=(i<2?"≤ MÁX ":"≥ MÍN ")+guide[i].ToString(i==4?"0.0":"0")+units[i];values[i].rectTransform.sizeDelta=new Vector2(170,28);
+ }
+ resourceNames[2].text="POTENCIA MEDIA";resourceNames[3].text="CAPACIDAD BATERÍA";resourceNames[4].text="PROPELENTE";
+ var control=GetComponent<MissionControlDirector>();bool missionReady=!control||control.CanAssemble;assembleButton.interactable=!Busy&&app.Stage==1&&missionReady;
+ launchButton.interactable=!Busy&&Assembled&&app.Stage==1&&missionReady;
+ launchButton.GetComponentInChildren<Text>().text=Assembled?(c.CanLaunch?"LANZAR MISIÓN":"LANZAR CON ADVERTENCIAS"):"LANZAR / ENSAMBLAJE PENDIENTE";
+ progress.text=Busy?"ENSAMBLANDO · "+MountedCount+" / "+TotalParts+" piezas":Assembled?"ENSAMBLAJE VERIFICADO · "+TotalParts+" / "+TotalParts+" piezas":"ENSAMBLAJE PENDIENTE · Confirma tu diseño";
+ assemblyLabel.text=(Busy?"BRAZOS EN OPERACIÓN":Assembled?"SATÉLITE ENSAMBLADO":"DISEÑO VIRTUAL / PENDIENTE DE ENSAMBLAJE")+"   ·   "+c.Mission.name;var loss=GetComponent<OrbitalFailureController>();if(loss&&loss.Destroyed){progress.text="PÉRDIDA TOTAL · REDISEÑA LA MISIÓN";assemblyLabel.text="SATÉLITE DESTRUIDO / SIN CONEXIÓN";}
+ }
+ public void StartAssembly(){if(Busy||app.Stage!=1)return;var control=GetComponent<MissionControlDirector>();if(control&&!control.CanAssemble){control.ExplainOrder();return;}ClearAssembly();Busy=true;if(ConsoleActive)SetConsole(false);assemblyRoutine=StartCoroutine(Assembly());UpdateTelemetry();}
+ class AssemblyItem{public Transform part,parent;public Vector3 position,scale;public Quaternion rotation;public int robot;}
+ Coroutine[] assemblyWorkers=new Coroutine[2];public bool[] RobotWorking=new bool[2];public int ConcurrentFrames{get;private set;}
+ IEnumerator Assembly(){
+ var visuals=app.GetComponent<CatalogVisuals>();physicalCraft=visuals.Snapshot(assemblyOrigin);
+ var items=new List<AssemblyItem>();int[] supplySlots={0,0};int group=0;
+ foreach(Transform anchor in physicalCraft){
+ foreach(Transform module in anchor){
+ var pieces=new List<Transform>();foreach(Transform p in module)pieces.Add(p);
+ foreach(var part in pieces){int robot=group%2;var item=new AssemblyItem{part=part,parent=module,position=part.localPosition,rotation=part.localRotation,scale=part.localScale,robot=robot};items.Add(item);int slot=supplySlots[robot]++;part.SetParent(null,true);
+ part.position=(robot==0?leftSupply:rightSupply).position+new Vector3((slot%4-1.5f)*.24f,.06f,(slot/4)*.24f);part.rotation=Quaternion.Euler(90,robot*180,0);staged.Add(part.gameObject);}
+ group++;}
+ }
+ TotalParts=items.Count;MountedCount=0;ConcurrentFrames=0;UpdateTelemetry();
+ assemblyWorkers[0]=StartCoroutine(AssembleWorker(items,0));assemblyWorkers[1]=StartCoroutine(AssembleWorker(items,1));
+ while(RobotWorking[0]||RobotWorking[1]){if(RobotWorking[0]&&RobotWorking[1])ConcurrentFrames++;yield return null;}
+ while(laserWelder&&laserWelder.IsBusy)yield return null;Busy=false;Assembled=MountedCount==TotalParts;assemblyRoutine=null;UpdateTelemetry();app.status.text="ENSAMBLAJE COMPLETO · "+MountedCount+" piezas verificadas";
+ var fx=GetComponent<StationPolish>();if(fx)fx.DockEffect(assemblyOrigin.position,true);
+ }
+IEnumerator AssembleWorker(List<AssemblyItem> items,int robot){
+ RobotWorking[robot]=true;yield return new WaitForSeconds(robot==0?.12f:.53f);var fx=GetComponent<StationPolish>();var arm=ArmFor(robot);
+ foreach(var item in items){if(item.robot!=robot)continue;var part=item.part;if(!part)continue;
+ if(arm)yield return arm.AnimateGrip(false,.12f);
+ yield return new WaitForSeconds(.04f+(robot==0?.03f:.11f));yield return MoveArm(robot,part.position+Vector3.up*.12f,robot==0?.4f:.51f);if(fx)fx.DockEffect(part.position);
+ if(arm)yield return arm.AnimateGrip(true,.16f);part.SetParent(armGrip[robot],true);yield return MoveArm(robot,item.parent.TransformPoint(item.position)+Vector3.up*.1f,.65f);
+ if(arm)yield return arm.AnimateGrip(false,.15f);part.SetParent(item.parent,true);Vector3 start=part.localPosition;Quaternion orientation=part.localRotation;
+ for(float t=0;t<1;t+=Time.deltaTime/.2f){part.localPosition=Vector3.Lerp(start,item.position,Mathf.SmoothStep(0,1,t));part.localRotation=Quaternion.Slerp(orientation,item.rotation,t);yield return null;}
+ part.localPosition=item.position;part.localRotation=item.rotation;part.localScale=item.scale;
+ if(laserWelder)laserWelder.Weld(part.position);else if(fx)fx.DockEffect(part.position);MountedCount++;app.status.text="BRAZOS EN PARALELO · "+MountedCount+" / "+TotalParts+" piezas";UpdateTelemetry();
+ yield return MoveArm(robot,armBases[robot].position+Vector3.up*1.9f+Vector3.back*.3f,.15f);
+ }RobotWorking[robot]=false;assemblyWorkers[robot]=null;
+}
+ Transform Anchor(Transform root,string key){foreach(var t in root.GetComponentsInChildren<Transform>(true))if(t.name==key)return t;return root;}
+ IEnumerator MoveArm(int index,Vector3 target,float duration){Vector3 from=armGrip[index].position;Vector3 waypoint=(from+target)*.5f+Vector3.up*(index==0?.24f:.4f)+Vector3.forward*(index==0?.1f:-.12f);for(float t=0;t<1;t+=Time.deltaTime/duration){float ease=Mathf.SmoothStep(0,1,t);Vector3 point=Vector3.Lerp(Vector3.Lerp(from,waypoint,ease),Vector3.Lerp(waypoint,target,ease),ease);DriveArm(index,point);yield return null;}DriveArm(index,target);}
+ void DriveArm(int i,Vector3 target){var articulated=ArmFor(i);if(articulated){articulated.MoveTo(target);return;}Vector3 shoulder=armBases[i].position+Vector3.up*.65f;Vector3 elbow=Vector3.Lerp(shoulder,target,i==0?.43f:.58f)+Vector3.up*(i==0?.8f:1.08f)+Vector3.forward*(i==0?.25f:-.2f);armElbow[i].position=elbow;armWrist[i].position=target;armGrip[i].position=target;Beam(armUpper[i],shoulder,elbow,.2f);Beam(armLower[i],elbow,target,.15f);}
+ static void Beam(Transform t,Vector3 a,Vector3 b,float width){t.position=(a+b)*.5f;t.up=(b-a).normalized;t.localScale=new Vector3(width,Vector3.Distance(a,b)*.5f,width);}
+ public void SetConsole(bool active){
+ if(!initialized)return;
+ if(active&&!ConsoleActive){savedPosition=playerCamera.transform.position;savedRotation=playerCamera.transform.rotation;}
+ if(!active&&ConsoleActive){if(viewTween!=null)StopCoroutine(viewTween);viewTween=StartCoroutine(TransitionView(savedPosition,savedRotation));}
+ ConsoleActive=active;playerCamera.fieldOfView=active?49:68;selectionRaycaster.enabled=active;
+ Cursor.lockState=MobileRuntime.Active?CursorLockMode.None:active?CursorLockMode.None:CursorLockMode.Locked;Cursor.visible=MobileRuntime.Active||active;
+ if(active){Vector3 midpoint=(selectionScreen.position+dataScreen.position)*.5f;Vector3 destination=midpoint-Quaternion.Euler(0,selectionScreen.eulerAngles.y+3,0)*Vector3.forward*2.9f;destination.y=midpoint.y;if(viewTween!=null)StopCoroutine(viewTween);viewTween=StartCoroutine(TransitionView(destination,Quaternion.Euler(0,selectionScreen.eulerAngles.y+3,0)));}
+ else {yaw=player.transform.eulerAngles.y;pitch=playerCamera.transform.localEulerAngles.x;if(pitch>180)pitch-=360;}
+ }
+ IEnumerator TransitionView(Vector3 destination,Quaternion rotation){Vector3 from=playerCamera.transform.position;Quaternion start=playerCamera.transform.rotation;for(float t=0;t<1;t+=Time.deltaTime/.45f){float ease=Mathf.SmoothStep(0,1,t);playerCamera.transform.position=Vector3.Lerp(from,destination,ease);playerCamera.transform.rotation=Quaternion.Slerp(start,rotation,ease);yield return null;}playerCamera.transform.position=destination;playerCamera.transform.rotation=rotation;viewTween=null;if(!ConsoleActive){yaw=player.transform.eulerAngles.y;pitch=playerCamera.transform.localEulerAngles.x;if(pitch>180)pitch-=360;}} 
+ public bool CanInteractWithConsole {get {var room=GetComponent<StationRoomController>();if(room&&(room.RoomDestroyed||room.IsPaused))return false;Vector3 spot=(selectionScreen.position+dataScreen.position)*.5f-selectionScreen.forward*3.1f;spot.y=player.transform.position.y;return Vector3.Distance(player.transform.position,spot)<3.5f;}}
+ public void ToggleTouchConsole(){var room=GetComponent<StationRoomController>();if(room&&(room.IsPaused||room.RoomDestroyed))return;if(ConsoleActive||CanInteractWithConsole)SetConsole(!ConsoleActive);}
+ void UpdateTouch(StationRoomController room){
+  var d=MobileRuntime.ConsumeLook();
+  if(!ConsoleActive&&viewTween==null){
+   yaw+=d.x*.12f;pitch=Mathf.Clamp(pitch-d.y*.12f,-75,75);player.transform.rotation=Quaternion.Euler(0,yaw,0);playerCamera.transform.localRotation=Quaternion.Euler(pitch,0,0);
+   Vector2 move=Vector2.ClampMagnitude(MobileRuntime.Move,1);vertical=room&&room.RoomDestroyed?0:player.isGrounded?-1:vertical-20*Time.deltaTime;float lift=room&&room.RoomDestroyed?MobileRuntime.Lift*2.3f:0;
+   player.Move((player.transform.right*move.x+player.transform.forward*move.y)*2.3f*Time.deltaTime+Vector3.up*(vertical+lift)*Time.deltaTime);
+  }
+  if(hint)hint.text="";UpdateTelemetry();
+ }
+
+ void Update(){
+ if(!initialized)return;var room=GetComponent<StationRoomController>();if(room&&room.IsPaused)return;if(MobileRuntime.Active){UpdateTouch(room);return;}var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;
+ 
+ Vector3 consoleSpot=(selectionScreen.position+dataScreen.position)*.5f-selectionScreen.forward*3.1f;consoleSpot.y=player.transform.position.y;bool near=Vector3.Distance(player.transform.position,consoleSpot)<3.5f;
+ if(k.eKey.wasPressedThisFrame&&(ConsoleActive||near))SetConsole(!ConsoleActive);
+ if(!ConsoleActive&&viewTween==null){
+ if(Cursor.lockState!=CursorLockMode.Locked&&m.rightButton.wasPressedThisFrame){Cursor.lockState=CursorLockMode.Locked;Cursor.visible=false;}
+ if(Cursor.lockState==CursorLockMode.Locked){var d=m.delta.ReadValue();yaw+=d.x*.1f;pitch=Mathf.Clamp(pitch-d.y*.1f,-75,75);player.transform.rotation=Quaternion.Euler(0,yaw,0);playerCamera.transform.localRotation=Quaternion.Euler(pitch,0,0);}
+ Vector2 move=new Vector2((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));move=Vector2.ClampMagnitude(move,1);
+ vertical=room&&room.RoomDestroyed?0:player.isGrounded?-1:vertical-20*Time.deltaTime;float lift=room&&room.RoomDestroyed?((k.spaceKey.isPressed?1:0)-(k.leftCtrlKey.isPressed?1:0))*2.3f:0;player.Move((player.transform.right*move.x+player.transform.forward*move.y)*(k.leftShiftKey.isPressed?4:2.3f)*Time.deltaTime+Vector3.up*(vertical+lift)*Time.deltaTime);
+ }
+ hint.text=room&&room.RoomDestroyed?"GRAVEDAD CERO · WASD / ESPACIO subir / CTRL bajar · ESC pausa":Busy?"ENSAMBLAJE EN CURSO · "+MountedCount+" / "+TotalParts+" piezas · Puedes recorrer la sala":ConsoleActive?"CONSOLA ACTIVA · Clic para seleccionar / ESC para explorar":near?"WASD · MOUSE para mirar · E consola · ALT cursor · ESC pausa":"WASD · MOUSE para mirar · Acércate al escritorio";
+ UpdateTelemetry();
+ }
+ public void EnterRoomCataclysm(){if(ConsoleActive){SetConsole(false);playerCamera.transform.position=savedPosition;playerCamera.transform.rotation=savedRotation;}StopAllCoroutines();viewTween=null;Busy=false;for(int i=0;i<RobotWorking.Length;i++)RobotWorking[i]=false;selectionRaycaster.enabled=false;player.detectCollisions=false;Cursor.lockState=MobileRuntime.Active?CursorLockMode.None:CursorLockMode.Locked;Cursor.visible=MobileRuntime.Active;} public bool LaunchMechanismBusy{get{var chamber=GetComponentInChildren<WorkshopAirlock>();return chamber&&chamber.IsCycling;}}
+ public void LaunchPhysical(){if(!physicalCraft)return;var chamber=GetComponentInChildren<WorkshopAirlock>();if(chamber)StartCoroutine(chamber.Launch(physicalCraft));else StartCoroutine(Depart());}
+ IEnumerator Depart(){var craft=physicalCraft;Vector3 start=craft.position;for(float t=0;t<1;t+=Time.deltaTime/5){if(!craft)yield break;craft.position=start+Vector3.up*t*t*8+Vector3.forward*t*3;yield return null;}if(craft)craft.gameObject.SetActive(false);}
+ void OnDisable(){Cursor.lockState=CursorLockMode.None;Cursor.visible=true;}
+ public void ShowReport(MissionResult result){app.inspector.gameObject.SetActive(false);}
+
+
+
+IndustrialRobotArm ArmFor(int index){if(articulatedArms!=null&&index<articulatedArms.Length&&articulatedArms[index])return articulatedArms[index];return importedRobotArm&&importedRobotArm.robotIndex==index?importedRobotArm:null;}
+}
+}

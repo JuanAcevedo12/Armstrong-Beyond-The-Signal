@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+namespace Caronte {
+[Serializable] public class MissionConfig {
+ public int payload=0,solar=1,battery=1,radio=1,storage=1,orbit=0;
+ public float duty=.25f;
+ public MissionConfig Copy(){return (MissionConfig)MemberwiseClone();}
+ public float Mass {get{return 4.4f+new[]{1.2f,2.4f,12f}[payload]+new[]{.5f,1f,1.6f}[solar]+new[]{.4f,.8f,1.3f}[battery]+new[]{.3f,.7f,1.1f}[radio]+.15f;}}
+ public float Cost {get{return 12+payload*5+solar*3+battery*2+radio*3+storage;}}
+ public float Capacity {get{return new[]{20f,60f,120f}[battery];}}
+ public float Storage {get{return new[]{256f,2048f,8192f}[storage];}}
+ public float Generation {get{return new[]{9f,26f,42f}[solar];}}
+ public float PayloadPower {get{return new[]{5f,12f,25f}[payload];}}
+ public float Rate {get{return new[]{.1f,2f,6f}[radio];}}
+ public float Altitude {get{return orbit==0?500:800;}}
+ public double Period {get{return 2*Math.PI*Math.Sqrt(Math.Pow(6371+Altitude,3)/398600.4418);}}
+ public bool CanLaunch {get{return Mass<=14&&Cost<=40&&payload<2;}}
+}
+[Serializable] public class Sample { public double time; public float energy,stored,sent; }
+[Serializable] public class MissionResult {
+ public MissionConfig config; public double captured,sent,lost,useful; public float minEnergy,instrumentSeconds,blackoutSeconds; public double elapsed;
+ public List<Sample> samples=new List<Sample>(); public List<string> events=new List<string>();
+ public float Score {get{return (float)Math.Min(100,70*Math.Min(1,useful/1000)+15*Math.Max(0,1-lost/Math.Max(1,captured))+15*Math.Max(0,1-blackoutSeconds/2592000f));}}
+}
+public class MissionEngine {
+ public const double Duration=30*86400,StepSeconds=30;
+ public MissionResult Result; public float Energy; public double Stored; public bool Eclipse,Contact,Observing; bool first=true,oldEclipse,oldContact,oldLow;
+ public MissionEngine(MissionConfig c){Result=new MissionResult{config=c.Copy(),minEnergy=c.Capacity*.8f};Energy=Result.minEnergy;Log("Satélite desplegado; inicio de operación.");}
+ void Log(string s){Result.events.Add("D"+(Result.elapsed/86400).ToString("0.00")+" · "+s);}
+ public void Step(){
+ if(Result.elapsed>=Duration)return;
+ var c=Result.config; double phase=Result.elapsed%c.Period/c.Period;
+ Eclipse=phase>.64; double dayPhase=Result.elapsed%86400;
+ int passes=c.orbit==0?4:5; double window=86400.0/passes;
+ Contact=dayPhase%window<480; // didactic eight minute passes
+ bool wantObserve=!Eclipse&&phase<c.duty;
+ float baseWh=4f*(float)StepSeconds/3600;
+ float available=Energy+(Eclipse?0:c.Generation)*(float)StepSeconds/3600;
+ bool powered=available>=baseWh;
+ float used=powered?baseWh:available;
+ Observing=powered&&wantObserve&&available-used>=c.PayloadPower*(float)StepSeconds/3600;
+ if(Observing){used+=c.PayloadPower*(float)StepSeconds/3600;float amount=(c.payload==0?.008f:.2f)*(float)StepSeconds;
+ Result.captured+=amount;double accepted=Math.Min(amount,c.Storage-Stored);Stored+=accepted;Result.lost+=amount-accepted;Result.instrumentSeconds+=(float)StepSeconds;}
+ if(powered&&Contact&&Stored>0){
+ float txWh=6f*(float)StepSeconds/3600;float fraction=Math.Min(1,Math.Max(0,(available-used)/txWh));
+ double sent=Math.Min(Stored,c.Rate/8*(float)StepSeconds*fraction);used+=txWh*fraction;Stored-=sent;Result.sent+=sent;Result.useful+=sent*(c.orbit==0?1:.65f);}
+ Energy=Math.Min(c.Capacity,Math.Max(0,available-used));
+ if(!powered)Result.blackoutSeconds+=(float)StepSeconds;
+ Result.minEnergy=Math.Min(Result.minEnergy,Energy);
+ if(first||oldEclipse!=Eclipse)Log(Eclipse?"Inicio de eclipse":"Iluminación solar");
+ if(first||oldContact!=Contact)Log(Contact?"Ventana de estación disponible":"Fin de contacto");
+ bool low=Energy<c.Capacity*.2f;if(low&&!oldLow)Log("Batería por debajo del 20 %");
+ oldEclipse=Eclipse;oldContact=Contact;oldLow=low;first=false;
+ Result.elapsed+=StepSeconds;
+ if(((int)Result.elapsed)%1800==0)Result.samples.Add(new Sample{time=Result.elapsed,energy=Energy,stored=(float)Stored,sent=(float)Result.sent});
+ }
+ public void Complete(){while(Result.elapsed<Duration)Step();}
+}
+}

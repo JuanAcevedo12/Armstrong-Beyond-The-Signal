@@ -1,0 +1,157 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
+namespace Caronte {
+public class CarontePrototype : MonoBehaviour {
+ public CaronteStation station; public MissionConfig Configuration {get{return config;}} public int Stage {get{return stage;}} public void TogglePause(){if(stage==3)paused=!paused;} public Transform spacecraft;
+ public GameObject[] payloadPrefabs,solarPrefabs,batteryPrefabs,radioPrefabs,storagePrefabs;
+ public Material metal,gold,blue,green,glass;
+ public Camera viewer;
+ public Text telemetry,inspector,status,eventsText;
+ public RectTransform leftPanel,rightPanel;
+ public GameObject earth,orbitLine;
+ MissionConfig config=new MissionConfig();
+ MissionEngine engine; List<MissionResult> history=new List<MissionResult>();
+ Dictionary<string,GameObject> modules=new Dictionary<string,GameObject>();
+ Dictionary<string,Coroutine> jobs=new Dictionary<string,Coroutine>();
+ bool paused,reduced,internalView; int stage=1; float accumulator,speed=43200,yaw=35,pitch=20,distance=10; Vector3 focus;
+ float launchTime; Text stageText;
+ Color ink=new Color(.87f,.91f,.96f),accent=new Color(.49f,.77f,1);
+ void Start(){var ui=transform.Find("MissionConsole");if(ui)DestroyImmediate(ui.gameObject);var es=transform.Find("CaronteEventSystem");if(es)DestroyImmediate(es.gameObject);foreach(string key in new[]{"FrontPayloadAnchor","LeftSolarPanelAnchor","RightSolarPanelAnchor","BatteryAnchor","TopAntennaAnchor","StorageAnchor"}){var a=FindAnchor(key);for(int i=a.childCount-1;i>=0;i--)DestroyImmediate(a.GetChild(i).gameObject);}BuildInterface();ReplaceAll();Refresh();if(station!=null)station.InvalidateAssembly();}
+ public void Choose(string category,int index){
+ if(stage!=1||(station!=null&&station.Busy))return;
+ if(category=="Instrumento"&&index==2){status.text="INCOMPATIBLE · Cámara de 12 kg: supera el espacio asignado a carga útil 6U.";return;}
+ if(category=="Instrumento")config.payload=index;
+ if(category=="Solar")config.solar=index;
+ if(category=="Batería")config.battery=index;
+ if(category=="Radio")config.radio=index;
+ if(category=="Memoria")config.storage=index;
+ if(category=="Órbita")config.orbit=index;
+ ReplaceAll();Refresh();if(station!=null)station.InvalidateAssembly();
+ }
+ void ReplaceAll(){
+ Install("FrontPayloadAnchor",payloadPrefabs[config.payload]);
+ Install("LeftSolarPanelAnchor",solarPrefabs[config.solar]);
+ Install("RightSolarPanelAnchor",solarPrefabs[config.solar]);
+ Install("BatteryAnchor",batteryPrefabs[config.battery]);
+ Install("TopAntennaAnchor",radioPrefabs[config.radio]);
+ Install("StorageAnchor",storagePrefabs[config.storage]);
+ }
+ Transform FindAnchor(string key){foreach(Transform t in spacecraft.GetComponentsInChildren<Transform>(true))if(t.name==key)return t;return spacecraft;}
+ void Install(string key,GameObject prefab){
+ GameObject old;modules.TryGetValue(key,out old);
+ if(old!=null&&old.name==prefab.name)return;
+ Coroutine running;if(jobs.TryGetValue(key,out running)&&running!=null)StopCoroutine(running);
+ if(old!=null)Destroy(old);
+ var anchor=FindAnchor(key);var go=Instantiate(prefab,anchor);if(station!=null)foreach(var t in go.GetComponentsInChildren<Transform>(true))t.gameObject.layer=8;go.name=prefab.name;modules[key]=go;
+ jobs[key]=StartCoroutine(AnimateModule(go,key));
+ }
+ IEnumerator AnimateModule(GameObject go,string key){
+ Vector3 end=Vector3.zero,start=new Vector3(0,1.5f,-2);
+ go.transform.localPosition=start;
+ for(float t=0;t<1;t+=Time.deltaTime/(reduced?.01f:.7f)){
+ if(!go)yield break;float v=Mathf.SmoothStep(0,1,t);go.transform.localPosition=Vector3.Lerp(start,end,v);
+ go.transform.localRotation=Quaternion.Slerp(Quaternion.Euler(0,65,0),Quaternion.identity,v);yield return null;}
+ if(!go)yield break;go.transform.localPosition=end;go.transform.localRotation=Quaternion.identity;
+ if(key.Contains("Solar")){
+ var hinge=go.transform.Find("Hinge");
+ if(hinge)for(float t=0;t<1;t+=Time.deltaTime/(reduced?.01f:.65f)){hinge.localRotation=Quaternion.Euler(0,0,Mathf.Lerp(85,0,Mathf.SmoothStep(0,1,t)));yield return null;}
+ if(hinge)hinge.localRotation=Quaternion.identity;}
+ }
+ void Refresh(){
+ telemetry.text="MASA  "+config.Mass.ToString("0.0")+" / 14 kg     PRESUPUESTO  "+config.Cost.ToString("0")+" / 40 cr     SOLAR  "+config.Generation+" W     BATERÍA  "+config.Capacity+" Wh     MEMORIA  "+config.Storage+" MB";
+ inspector.text="VERIFICACIÓN DE INGENIERÍA\n\n"+(config.CanLaunch?"✓ Estructura y lanzamiento compatibles":"× Corrige masa, presupuesto o carga útil")+"\n\nMasa: "+config.Mass.ToString("0.00")+" kg\nLímite de diseño: 14 kg\n\nCosto: "+config.Cost+" créditos\nLímite: 40 créditos\n\nConsumo base: 4 W\nInstrumento activo: "+config.PayloadPower+" W\nGeneración iluminado: "+config.Generation+" W\n\nÓrbita: "+config.Altitude+" km\nPeríodo: "+(config.Period/60).ToString("0.0")+" min\nContacto: "+(config.orbit==0?4:5)+" × 8 min/día\n\n"+(config.Generation*.64f<4+config.PayloadPower*config.duty?"⚠ Energía media limitada. Revisa paneles o actividad.":"✓ Balance energético orientativo positivo")+"\n\nPropulsión: no requerida\nDespliegue directo por el lanzador.\n\nModelo didáctico determinista.\nLas ventanas de estación son supuestas.";
+ status.text=config.CanLaunch?"DISEÑO LISTO PARA ENSAYO · Objetivo: 1000 MB útiles en 30 días":"LANZAMIENTO BLOQUEADO · Corrige las restricciones obligatorias";
+ }
+ void Preset(int i){
+ if(stage!=1||(station!=null&&station.Busy))return;
+ config=new MissionConfig();
+ if(i==1){config.solar=0;config.radio=0;config.battery=0;config.payload=1;config.duty=.6f;}
+ if(i==2){config.payload=2;config.solar=2;config.radio=2;}
+ ReplaceAll();Refresh();if(station!=null)station.InvalidateAssembly();
+ }
+ void Launch(){if(station!=null&&!station.Assembled){status.text="ENSAMBLA EL SATÉLITE ANTES DE LANZAR.";return;}if(stage!=1||(station!=null&&station.Busy))return;if(!config.CanLaunch){status.text="LANZAMIENTO BLOQUEADO · Masa o presupuesto excedidos.";return;}stage=2;launchTime=0;status.text="PREPARACIÓN · Secuencia narrativa de lanzamiento";if(station!=null)station.LaunchPhysical();else leftPanel.gameObject.SetActive(false);}
+ void BeginOrbit(){stage=3;engine=new MissionEngine(config);paused=false;accumulator=0;earth.SetActive(true);orbitLine.SetActive(true);spacecraft.localScale=Vector3.one*.22f;focus=Vector3.zero;distance=12;status.text="OPERACIÓN ORBITAL · Escala visual comprimida";}
+ void Finish(){if(engine==null)return;stage=4;paused=true;history.Add(engine.Result);var r=engine.Result;
+ inspector.text="INFORME DE MISIÓN\n\nPuntuación: "+r.Score.ToString("0.0")+" / 100\n"+(r.useful>=1000?"OBJETIVO ALCANZADO":"OBJETIVO INCOMPLETO")+"\n\nTiempo: "+(r.elapsed/86400).ToString("0.00")+" / 30 días\nCapturados: "+r.captured.ToString("0")+" MB\nTransmitidos: "+r.sent.ToString("0")+" MB\nÚtiles: "+r.useful.ToString("0")+" MB\nPerdidos: "+r.lost.ToString("0")+" MB\nEnergía mínima: "+r.minEnergy.ToString("0.0")+" Wh\nTiempo sin energía: "+(r.blackoutSeconds/3600).ToString("0.0")+" h\n\n"+(r.lost>0?"Aumenta almacenamiento o enlace.\n":"")+(r.blackoutSeconds>0?"Aumenta paneles/batería o reduce actividad.":"")+"\n\nPuntuación: ciencia 70 + conservación de datos 15 + continuidad eléctrica 15.";
+ if(history.Count>1)inspector.text+="\n\nEnsayo anterior: "+history[history.Count-2].Score.ToString("0.0")+" puntos.";
+ status.text="INFORME · "+history.Count+" ensayo(s) en esta sesión"; ShowGraphs(r);
+ }
+ void ResetDesign(){if(station!=null){if(station.Busy)return;station.ClearAssembly();}var charts=transform.Find("MissionConsole/ConsoleFrame/Charts");if(charts)Destroy(charts.gameObject);stage=1;engine=null;earth.SetActive(false);orbitLine.SetActive(false);spacecraft.position=Vector3.zero;spacecraft.localScale=Vector3.one;leftPanel.gameObject.SetActive(true);distance=10;focus=Vector3.zero;ReplaceAll();Refresh();if(station!=null)station.InvalidateAssembly();}
+ void ShowGraphs(MissionResult result){if(station!=null){station.ShowReport(result);return;}var parent=transform.Find("MissionConsole/ConsoleFrame");var panel=Panel(parent,"Charts",440,380,1000,400);Label(panel,"EnergyTitle","ENERGÍA ALMACENADA (Wh) · 0 — 30 días",16,8,950,30,18);Label(panel,"DataTitle","DATOS (MB) · Azul: almacenados / Amarillo: transmitidos",16,208,950,30,18);for(int i=0;i<2;i++){var g=new GameObject("TimeSeries",typeof(RectTransform),typeof(CanvasRenderer),typeof(MissionGraph));g.transform.SetParent(panel,false);var rt=(RectTransform)g.transform;rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(18,-45-i*195);rt.sizeDelta=new Vector2(960,140);var graph=g.GetComponent<MissionGraph>();graph.samples=result.samples;graph.energy=i==0;graph.capacity=result.config.Capacity;graph.raycastTarget=false;graph.SetVerticesDirty();}} void Export(){var data=engine!=null?JsonUtility.ToJson(engine.Result,true):JsonUtility.ToJson(config,true);GUIUtility.systemCopyBuffer=data;status.text="JSON copiado al portapapeles.";}
+ void Update(){
+ if(stage==2){launchTime+=Time.deltaTime;status.text=launchTime<3?"LANZAMIENTO EN "+Mathf.CeilToInt(3-launchTime):"ASCENSO Y SEPARACIÓN · Representación narrativa";
+ spacecraft.position=Vector3.up*Mathf.Max(0,launchTime-3)*1.3f;if(launchTime>6)BeginOrbit();}
+ if(stage==3&&!paused){
+ accumulator+=Time.deltaTime*speed;int count=0;
+ while(accumulator>=MissionEngine.StepSeconds&&count++<4000&&engine.Result.elapsed<MissionEngine.Duration){engine.Step();accumulator-=(float)MissionEngine.StepSeconds;}
+ float angle=(float)(engine.Result.elapsed/config.Period*Math.PI*2);
+ spacecraft.position=new Vector3(Mathf.Cos(angle)*4.1f,Mathf.Sin(angle)*1.5f,Mathf.Sin(angle)*3.5f);spacecraft.LookAt(Vector3.zero);
+ telemetry.text="DÍA "+(engine.Result.elapsed/86400).ToString("0.00")+" / 30     BATERÍA "+engine.Energy.ToString("0.0")+" Wh     DATOS "+engine.Stored.ToString("0.0")+" MB     ENVIADOS "+engine.Result.sent.ToString("0")+" MB";
+ status.text=(engine.Eclipse?"ECLIPSE":"ILUMINACIÓN")+"  ·  "+(engine.Contact?"CONTACTO TERRESTRE":"SIN CONTACTO")+"  ·  "+(engine.Observing?"CAPTURA ACTIVA":"INSTRUMENTO EN ESPERA");
+ var logs=engine.Result.events;eventsText.text=string.Join("\n",logs.GetRange(Math.Max(0,logs.Count-6),Math.Min(6,logs.Count)));
+ if(engine.Result.elapsed>=MissionEngine.Duration)Finish();
+ }
+ if(earth.activeSelf)earth.transform.Rotate(Vector3.up,Time.deltaTime*.35f,Space.World);
+ var mouse=Mouse.current;if(mouse!=null&&station==null){
+ bool over=EventSystem.current!=null&&EventSystem.current.IsPointerOverGameObject();
+ if(!over&&mouse.rightButton.isPressed){var delta=mouse.delta.ReadValue();yaw+=delta.x*.2f;pitch=Mathf.Clamp(pitch-delta.y*.2f,-70,70);}
+ if(!over)distance=Mathf.Clamp(distance-mouse.scroll.ReadValue().y*.005f,5,18);
+ if(!over&&mouse.leftButton.wasPressedThisFrame&&stage==1){RaycastHit hit;if(Physics.Raycast(viewer.ScreenPointToRay(mouse.position.ReadValue()),out hit)){focus=hit.point;status.text="INSPECCIÓN · "+hit.collider.name;}}
+ }
+ Vector3 target=focus+Quaternion.Euler(pitch,yaw,0)*new Vector3(0,0,-distance);
+ viewer.transform.position=Vector3.Lerp(viewer.transform.position,target,Time.deltaTime*6);viewer.transform.LookAt(focus);
+ }
+ Text Label(Transform parent,string name,string value,float x,float y,float w,float h,int size=20){
+ var go=new GameObject(name,typeof(RectTransform),typeof(Text));go.transform.SetParent(parent,false);
+ var rt=(RectTransform)go.transform;rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(x,-y);rt.sizeDelta=new Vector2(w,h);
+ var t=go.GetComponent<Text>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.text=value;t.fontSize=size;t.color=ink;t.raycastTarget=false;t.horizontalOverflow=HorizontalWrapMode.Wrap;t.resizeTextForBestFit=true;t.resizeTextMinSize=12;t.resizeTextMaxSize=size;return t;
+ }
+ RectTransform Panel(Transform parent,string name,float x,float y,float w,float h){
+ var go=new GameObject(name,typeof(RectTransform),typeof(Image));go.transform.SetParent(parent,false);var rt=(RectTransform)go.transform;
+ rt.anchorMin=rt.anchorMax=new Vector2(0,1);rt.pivot=new Vector2(0,1);rt.anchoredPosition=new Vector2(x,-y);rt.sizeDelta=new Vector2(w,h);go.GetComponent<Image>().color=new Color(.078f,.114f,.18f,.97f);return rt;
+ }
+ void ButtonAt(Transform parent,string text,float x,float y,float w,Action action){
+ var p=Panel(parent,text,x,y,w,40);p.GetComponent<Image>().color=new Color(.13f,.22f,.33f);var b=p.gameObject.AddComponent<Button>();b.onClick.AddListener(()=>action());var l=Label(p,text+" label",text,10,7,w-16,30,18);l.alignment=TextAnchor.MiddleLeft;
+ }
+ public void BuildInterface(){if(station!=null){station.BuildConsole(this);return;}
+ var cv=new GameObject("MissionConsole",typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));cv.transform.SetParent(transform,false);
+ cv.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay;var scaler=cv.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1920,1080);scaler.screenMatchMode=CanvasScaler.ScreenMatchMode.Expand;
+ var frame=new GameObject("ConsoleFrame",typeof(RectTransform));frame.transform.SetParent(cv.transform,false);var fr=(RectTransform)frame.transform;fr.anchorMin=fr.anchorMax=new Vector2(.5f,.5f);fr.pivot=new Vector2(.5f,.5f);fr.sizeDelta=new Vector2(1920,1080);var root=frame.transform;
+ Panel(root,"Header",0,0,1920,142);Label(root,"Brand","C A R O N T E   /   MISSION ARCHITECT",30,20,1000,45,30);
+ Label(root,"Mission","OBSERVACIÓN TERRESTRE  /  CUBESAT 6U  /  30 DÍAS",32,70,1100,32,18);
+ telemetry=Label(root,"Telemetry","",32,108,1850,30,20);
+ leftPanel=Panel(root,"ComponentCatalog",20,164,380,766);Label(leftPanel,"CatalogTitle","01  /  CONSTRUYE TU MISIÓN",18,18,345,40,23);
+ string[] cats={"Instrumento","Solar","Batería","Radio","Memoria","Órbita"};
+ string[][] options={new[]{"Microcámara","Multiespectral 6U","Óptica grande ×"},new[]{"Compacto 9 W","Desplegable 26 W","Ampliado 42 W"},new[]{"20 Wh","60 Wh","120 Wh"},new[]{"UHF 0.1 Mbps","S 2 Mbps","S 6 Mbps"},new[]{"256 MB","2 GB","8 GB"},new[]{"500 km","800 km"}};
+ for(int i=0;i<cats.Length;i++){int row=i;Label(leftPanel,"Category"+i,cats[i].ToUpper(),18,72+i*100,340,25,16);
+ for(int j=0;j<options[i].Length;j++){int idx=j;ButtonAt(leftPanel,options[i][j],18+j*116,102+i*100,110,()=>Choose(cats[row],idx));}}
+ ButtonAt(leftPanel,"A · Equilibrada",18,686,160,()=>Preset(0));ButtonAt(leftPanel,"B · Limitada",188,686,170,()=>Preset(1));ButtonAt(leftPanel,"C · Incompatible",18,730,340,()=>Preset(2));
+ rightPanel=Panel(root,"Inspector",1500,164,400,766);inspector=Label(rightPanel,"Engineering","",20,20,360,720,20);
+ Label(root,"ViewportCaption","02 / ENSAMBLAJE    ·    ARRASTRA CON BOTÓN DERECHO / RUEDA PARA ZOOM",440,180,1020,35,18);
+ Label(root,"ScaleNote","Visual ampliado 1:2:3 · Dimensión 6U de referencia: 100 × 226.3 × 366 mm",440,224,1000,30,16);
+ eventsText=Label(root,"Events","",445,710,1000,180,18);
+ var bottom=Panel(root,"Controls",20,948,1880,112);
+ ButtonAt(bottom,"Lanzar",16,14,120,Launch);
+ ButtonAt(bottom,"Pausa / continuar",146,14,200,()=>{if(stage==3)paused=!paused;});
+ ButtonAt(bottom,"Velocidad ×",356,14,160,()=>{speed=speed==43200?172800:43200;});
+ ButtonAt(bottom,"Informe",526,14,130,()=>{if(stage==3)Finish();});
+ ButtonAt(bottom,"Rediseñar",666,14,140,ResetDesign);
+ ButtonAt(bottom,"Vista general",816,14,160,()=>{focus=Vector3.zero;distance=10;yaw=35;pitch=20;});
+ ButtonAt(bottom,"Despiece",986,14,140,()=>{internalView=!internalView;FindAnchor("BodyAnchor").gameObject.SetActive(!internalView);});
+ ButtonAt(bottom,"Reducir movimiento",1136,14,230,()=>{reduced=!reduced;});
+ ButtonAt(bottom,"Copiar JSON",1376,14,170,Export);
+ status=Label(bottom,"Status","",16,66,1830,35,20);
+ var es=new GameObject("CaronteEventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));es.transform.SetParent(transform,false);
+ }
+}
+}

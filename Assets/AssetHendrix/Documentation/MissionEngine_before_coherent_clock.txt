@@ -1,0 +1,62 @@
+using System;using System.Collections.Generic;
+namespace Caronte{
+[Serializable]public class MissionConfig{
+ public int mission;public int[] choices={0,0,0,1,0,0,1,0,0,0,0};public bool secondInstrument;
+ public int payload,solar=1,battery=1,radio=1,storage=1,orbit;public float duty=.25f;
+ public MissionDefinition Mission{get{return MissionCatalog.Missions[mission];}}
+ public MissionConfig Copy(){var c=(MissionConfig)MemberwiseClone();c.choices=(int[])choices.Clone();return c;}
+ public float DryMass{get{return MissionCatalog.Total(this,true);}} public float Propellant{get{return DryMass*(float)(Math.Exp(MissionCatalog.DeltaV[mission]/(9.81*new[]{65,320,2800}[choices[4]]))-1);}}
+ public float Mass{get{return DryMass+Propellant;}}public float Cost{get{return MissionCatalog.Total(this,false);}}
+ public float MaxMass{get{return new[]{150,850,6000}[choices[0]];}}
+ public float LauncherCapacity{get{return MissionCatalog.LaunchCaps[choices[9]][mission];}}
+ public float Capacity{get{return new[]{35,140,1050}[choices[3]];}}public float Storage{get{return 8192;}}
+ public float Generation{get{return choices[2]==2?330:new[]{150f,2000f}[choices[2]]*MissionCatalog.SolarFlux[mission]*(mission==5?.70909f:1);}}
+ public float AverageGeneration{get{return Generation*(choices[2]==2?1:1-Mission.eclipse);}}
+ public float PayloadPower{get{return MissionCatalog.Options[1][choices[1]].power+(secondInstrument&&choices[1]!=2?12:0);}}
+ public float Load{get{float p=0;for(int i=0;i<11;i++)if(i!=2)p+=MissionCatalog.Options[i][choices[i]].power;return p+(secondInstrument&&choices[1]!=2?12:0);}}
+ public float LinkQuality{get{float ant=choices[5]==0?(mission==0?1:.001f):choices[5]==1?(Mission.rangeKm<=1500000?1:.11f):1;float gs=choices[10]==0?(mission==0||mission==2?1:mission==4?.035f:.15f):choices[10]==1?(mission==4?.24f:1):1;return ant*gs;}}
+ public float Rate{get{return (mission==0?2:.2f)*LinkQuality;}}
+ public float Altitude{get{return mission==0?500:mission==2?100:mission==3?400:800;}}
+ public double Period{get{return mission==0?6000:mission==2?7050:mission==3?7028.5714:7200;}}
+ public bool CanLaunch{get{return Mass<=MaxMass&&LauncherCapacity>0&&Mass<=LauncherCapacity&&Cost<=Mission.budget;}}
+ public float ScienceQuality{
+ get{float acc=new[]{1,.1f,.005f}[choices[6]];float q=0;
+ if(mission==4){if(choices[1]==0&&acc<=.1f)q+=.5f;if((choices[1]==2||secondInstrument)&&acc<=1)q+=.5f;}
+ else{int need=Mission.required[1];if(choices[1]==need){float req=need==0?.1f:need==1?.005f:1;q=acc<=req?1:need==1&&choices[6]==1?.03f:0;}}
+ bool thermal=mission==0||choices[7]==Mission.required[7];if(!thermal)q=0;
+ if(mission==1&&choices[2]==2)q=0;
+ if((mission==2||mission==3||mission==4)&&choices[4]==2)q=0;
+ if(mission==5&&choices[2]==1)q=0;return q;}
+ }
+ public bool OperationalRisk{get{return !CanLaunch||ScienceQuality<.99f||AverageGeneration<Load||Capacity<Load*(float)(Period/3600)*Mission.eclipse||LinkQuality<.9f||new[]{5f,30f,300f}[choices[8]]<MissionCatalog.Radiation[mission];}} public string Review{get{if(LauncherCapacity<=0)return "LANZADOR INCOMPATIBLE · No alcanza el destino seleccionado";if(Mass>MaxMass)return "MASA EXCEDIDA · "+Mass.ToString("0")+" / "+MaxMass+" kg de plataforma";if(Mass>LauncherCapacity)return "LANZADOR SOBRECARGADO · "+Mass.ToString("0")+" / "+LauncherCapacity+" kg";if(Cost>Mission.budget)return "PRESUPUESTO EXCEDIDO · "+Cost+" / "+Mission.budget+" cr";if(ScienceQuality<1)return "CIENCIA LIMITADA · Revisa instrumento, actitud, temperatura o maniobra";return AverageGeneration<Load?"ENERGÍA LIMITADA · Generación media menor al consumo":"DISEÑO VIABLE · Verifica batería y comunicaciones";}}
+}
+[Serializable]public class Sample{public double time;public float energy,stored,sent;}
+[Serializable]public class MissionResult{
+ public MissionConfig config;public bool missionLost; public string failureReason;public double captured,sent,lost,useful;public float minEnergy,instrumentSeconds,blackoutSeconds;public double elapsed;
+ public List<Sample> samples=new List<Sample>();public List<string> events=new List<string>();
+ public float Score{get{if(missionLost)return 0;return (float)(70*Math.Min(1,useful/config.Mission.dataGoal)+15*Math.Max(0,1-lost/Math.Max(1,captured))+15*Math.Max(0,1-blackoutSeconds/2592000f));}}
+}
+public class MissionEngine{
+ public const double Duration=2592000,StepSeconds=30;public MissionResult Result;public float Energy;public double Stored;public bool Eclipse,Contact,Observing;public bool ElectronicsAlive{get;private set;}=true;bool first=true,oldEclipse,oldContact,oldLow,failed;
+ public MissionEngine(MissionConfig c){Result=new MissionResult{config=c.Copy(),minEnergy=c.Capacity};Energy=c.Capacity;Log("Inicio de operación · "+c.Mission.name);}
+ void Log(string s){Result.events.Add("D"+(Result.elapsed/86400).ToString("0.00")+" · "+s);}
+ public void Step(){
+ if(Result.elapsed>=Duration)return;var c=Result.config;double phase=Result.elapsed%c.Period/c.Period;
+ Eclipse=c.Mission.eclipse>0&&phase>1-c.Mission.eclipse;Contact=Result.elapsed%21600<480;
+ bool alive=Result.elapsed/Duration<=Math.Min(1,new[]{5f,30f,300f}[c.choices[8]]/MissionCatalog.Radiation[c.mission]);
+ ElectronicsAlive=alive;if(!alive&&!failed){Log("Electrónica fuera de tolerancia de radiación");failed=true;}
+ float generation=c.choices[2]==2||!Eclipse?c.Generation:0;float available=Energy+generation*(float)StepSeconds/3600;
+ float needed=c.Load*(float)StepSeconds/3600;bool powered=available>=needed&&alive;float fraction=alive?Math.Min(1,available/Math.Max(.001f,needed)):0;
+ Energy=Math.Min(c.Capacity,Math.Max(0,available-needed));Observing=powered&&phase<c.duty&&(!Eclipse||c.mission==1||c.mission>=4);
+ if(Observing){double amount=(c.choices[1]==2?.005:.02)*(second(c)?1.25:1)*StepSeconds;Result.captured+=amount;double accepted=Math.Min(amount,c.Storage-Stored);Stored+=accepted;Result.lost+=amount-accepted;Result.instrumentSeconds+=(float)StepSeconds;}
+ if(powered&&Contact&&Stored>0){double tx=Math.Min(Stored,c.Rate/8*StepSeconds);Stored-=tx;Result.sent+=tx;Result.useful+=tx*c.ScienceQuality;}
+ if(!powered)Result.blackoutSeconds+=(float)StepSeconds;Result.minEnergy=Math.Min(Result.minEnergy,Energy);
+ if(first||Eclipse!=oldEclipse)Log(Eclipse?"Eclipse: consumo de batería":"Iluminación: generación disponible");
+ if(first||Contact!=oldContact)Log(Contact?"Estación en contacto":"Fin de ventana de enlace");
+ bool low=Energy<c.Capacity*.2f;if(low&&!oldLow)Log("Batería por debajo de 20 %");
+ first=false;oldEclipse=Eclipse;oldContact=Contact;oldLow=low;Result.elapsed+=StepSeconds;if(Result.elapsed>=Duration){Result.missionLost=c.OperationalRisk;Result.failureReason=Result.missionLost?c.Review:"";}
+ if((int)Result.elapsed%1800==0)Result.samples.Add(new Sample{time=Result.elapsed,energy=Energy,stored=(float)Stored,sent=(float)Result.sent});
+ }
+ bool second(MissionConfig c){return c.secondInstrument&&c.choices[1]!=2;}
+ public void Complete(){while(Result.elapsed<Duration)Step();}
+}}
